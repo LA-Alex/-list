@@ -1,0 +1,150 @@
+.dispatch-panel {
+  flex: 0 0 240px;
+  background: #f5f7fa;
+  border-left: 1px solid #e0e0e0;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dispatch-panel__header {
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #d46b08;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fff7e6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dispatch-panel__count {
+  font-size: 11px;
+  background: #fa8c16;
+  color: #fff;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+.dispatch-panel__list {
+  padding: 10px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.dispatch-panel__empty {
+  font-size: 13px;
+  color: #aaa;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Card */
+.dispatch-card {
+  background: #fff;
+  border: 1px solid #ffe0b2;
+  border-left: 4px solid #fa8c16;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(250,140,22,0.08);
+}
+
+.dispatch-card.reported {
+  border-left-color: #52c41a;
+  border-color: #b7eb8f;
+  background: #f6ffed;
+}
+
+.dispatch-card__top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dispatch-card__day {
+  font-size: 12px;
+  background: #fff3e0;
+  color: #d46b08;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dispatch-card__label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+
+.dispatch-card__label--link {
+  cursor: pointer;
+  color: #4a90d9;
+  text-decoration: underline dotted;
+  transition: color 0.15s;
+}
+
+.dispatch-card__label--link:hover {
+  color: #1677ff;
+}
+
+.dispatch-card__done-badge {
+  font-size: 12px;
+  color: #389e0d;
+  font-weight: 700;
+}
+
+.dispatch-card__to {
+  font-size: 15px;
+  color: #111;
+  font-weight: 600;
+}
+
+.dispatch-card__date {
+  font-size: 14px;
+  color: #111;
+  font-weight: 500;
+}
+
+.dispatch-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.dispatch-card__badge {
+  font-size: 13px;
+  background: #fff3cd;
+  color: #6b4c00;
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-weight: 700;
+}
+
+.dispatch-card__reported {
+  font-size: 11px;
+  color: #52c41a;
+  font-weight: 600;
+}
+
+.dispatch-card__confirm {
+  background: #52c41a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dispatch-card__confirm:hover {
+  background: #3a9c0f;
+}

@@ -1,0 +1,79 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.app-layout {
+  display: flex;
+  align-items: stretch;
+  height: calc(100vh - 100px);
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 4px 2px;
+}
+
+.week-nav__btn {
+  background: #f0f4ff;
+  border: 1px solid #c5d0e8;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  cursor: pointer;
+  color: #4a90d9;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.week-nav__btn:hover {
+  background: #dce8ff;
+}
+
+.week-nav__user {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+  cursor: pointer;
+}
+
+.week-nav__user:hover {
+  color: #4a90d9;
+  text-decoration: underline;
+}
+
+
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.drag-overlay-card {
+  background: #fff;
+  border: 1px solid #4a90d9;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a2e;
+  cursor: grabbing;
+  min-width: 160px;
+}

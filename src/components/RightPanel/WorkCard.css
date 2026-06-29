@@ -1,0 +1,381 @@
+.work-card {
+  background: #fff;
+  border: 1px solid #d0d7e0;
+  border-left: 4px solid #4a90d9;
+}
+
+.work-card.reported {
+  border-left-color: #52c41a;
+  background: #f6ffed;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.work-card__header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  cursor: grab;
+  user-select: none;
+}
+
+.work-card__label {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.work-card__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.work-card__btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.work-card__btn:hover {
+  opacity: 1;
+  background: #f0f0f0;
+}
+
+.work-card__btn--delete:hover {
+  background: #ffe5e5;
+}
+
+.work-card__btn--done:hover {
+  background: #e6f7e6;
+}
+
+.work-card__btn--partial {
+  font-size: 15px;
+  color: #d46b08;
+  font-weight: 700;
+}
+
+.work-card__btn--partial:hover {
+  background: #fff7e6;
+}
+
+.work-card__reported-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: #d9f7be;
+  font-size: 12px;
+  font-weight: 600;
+  color: #389e0d;
+}
+
+.work-card__confirm-btn {
+  background: #52c41a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.work-card__confirm-btn:hover {
+  background: #3a9c0f;
+}
+
+.work-card__preview {
+  padding: 6px 12px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  gap: 6px;
+  align-items: center;
+}
+
+.work-card__tag {
+  background: #eef3fb;
+  color: #4a90d9;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.work-card__form {
+  padding: 12px;
+  border-top: 1px solid #eee;
+  background: #fafbfc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.work-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.work-card__field label {
+  font-size: 13px;
+  color: #888;
+  font-weight: 600;
+}
+
+.work-card__field select,
+.work-card__field input,
+.work-card__field textarea {
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.work-card__field select:focus,
+.work-card__field input:focus,
+.work-card__field textarea:focus {
+  border-color: #4a90d9;
+}
+
+.work-card__checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.work-card__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.work-card__assignee-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.work-card__assignee {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #e8f0fe;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 13px;
+  color: #3367d6;
+}
+
+.work-card__assignee-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: #888;
+  padding: 0;
+  line-height: 1;
+}
+
+.work-card__assignee-remove:hover {
+  color: #e53935;
+}
+
+.work-card__user-search {
+  margin-top: 6px;
+}
+
+.work-card__user-dropdown {
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  background: #fff;
+  max-height: 160px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.work-card__user-option {
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #333;
+}
+
+.work-card__user-option:hover {
+  background: #f0f5ff;
+}
+
+.work-card__user-code {
+  color: #999;
+  font-size: 12px;
+}
+
+.work-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.work-card__cancel {
+  background: #f0f0f0;
+  color: #555;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.work-card__cancel:hover {
+  background: #e0e0e0;
+}
+
+.work-card__save {
+  background: #4a90d9;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.work-card__save:hover {
+  background: #357abd;
+}
+
+.work-card__tag--done {
+  background: #d9f7be;
+  color: #389e0d;
+}
+
+.work-card__tag--partial {
+  background: #fff7e6;
+  color: #d46b08;
+}
+
+.work-card.locked {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.work-card.locked .work-card__header {
+  cursor: default;
+}
+
+.work-card__copy-wrap {
+  position: relative;
+}
+
+.work-card__copy-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #fff;
+  border: 1px solid #d0d7e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  z-index: 100;
+  min-width: 160px;
+  overflow: hidden;
+}
+
+.work-card__copy-option {
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.work-card__copy-option:hover {
+  background: #f0f5ff;
+  color: #4a90d9;
+}
+
+/* Edit Modal */
+.edit-modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.edit-modal-box {
+  background: #fff;
+  border-radius: 10px;
+  width: 360px;
+  max-height: 85vh;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.edit-modal-scroll {
+  overflow-y: auto;
+  flex: 1;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-modal-scroll .modal-field label {
+  font-size: 12px;
+  color: #888;
+  font-weight: 600;
+}
+
+.edit-modal-scroll .modal-field select,
+.edit-modal-scroll .modal-field input,
+.edit-modal-scroll .modal-field textarea {
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-modal-scroll .modal-field select:focus,
+.edit-modal-scroll .modal-field input:focus,
+.edit-modal-scroll .modal-field textarea:focus {
+  border-color: #4a90d9;
+}
+
+.edit-modal-box .modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #eee;
+}
