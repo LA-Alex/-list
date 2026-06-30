@@ -59,6 +59,8 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
           {row.完成 !== '部分' && !completed && (
             <button className="work-card__btn work-card__btn--partial" onClick={() => onSave({ ...row, 完成: '部分' })} title="部分完成">▲</button>
           )}
+          <button className="work-card__btn" onClick={handleOpenModal} title="編輯">✏️</button>
+          <span className="work-card__btn-gap" />
           {onCopy && (
             <button
               className="work-card__btn work-card__btn--copy"
@@ -66,7 +68,6 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
               title="複製到今天"
             >📋</button>
           )}
-          <button className="work-card__btn" onClick={handleOpenModal} title="編輯">✏️</button>
           <button className="work-card__btn work-card__btn--delete" onClick={() => onDelete(row.subtableId)} title="刪除">🗑️</button>
         </div>
       </div>
@@ -86,7 +87,7 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
       </div>
 
       {showModal && (
-        <div className="edit-modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="edit-modal-overlay">
           <div className="edit-modal-box" onClick={e => e.stopPropagation()}>
             <div className="edit-modal-title">✏️ {row.來源標籤}</div>
             <div className="edit-modal-scroll">

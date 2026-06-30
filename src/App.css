@@ -55,6 +55,27 @@
   text-decoration: underline;
 }
 
+.week-nav__toggle {
+  margin-left: 12px;
+  background: #f0f4ff;
+  border: 1px solid #c5d0e8;
+  border-radius: 6px;
+  padding: 2px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.week-nav__toggle:hover {
+  background: #dce8ff;
+}
+
+.week-nav__toggle.active {
+  background: #1677ff;
+  color: #fff;
+  border-color: #1677ff;
+}
+
 
 .app-loading {
   display: flex;

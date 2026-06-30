@@ -67,6 +67,11 @@
   background: #fff7e6;
 }
 
+.work-card__btn-gap {
+  display: inline-block;
+  width: 12px;
+}
+
 .work-card__reported-bar {
   display: flex;
   align-items: center;

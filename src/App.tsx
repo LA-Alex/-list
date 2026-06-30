@@ -38,8 +38,10 @@ const App = () => {
   const [clockOutTime, setClockOutTime] = useState<string>('');
   const [workLocation, setWorkLocation] = useState<string>('');
   const [weekOffset, setWeekOffset] = useState(0);
+  const [viewMode, setViewMode] = useState<'week' | 'today'>('week');
   const todayDate = getTodayDate();
   const displayDates = getWeekDates(weekOffset);
+  const visibleDates = viewMode === 'today' ? [todayDate] : displayDates;
   const userName = kintone.getLoginUser().name;
 
   const sensors = useSensors(useSensor(PointerSensor, {
@@ -349,11 +351,20 @@ const App = () => {
         />
         <div className="right-panel">
           <div className="week-nav">
-            <button className="week-nav__btn" onClick={() => setWeekOffset(w => w - 1)}>‹</button>
+            {viewMode === 'week' && (
+              <button className="week-nav__btn" onClick={() => setWeekOffset(w => w - 1)}>‹</button>
+            )}
             <span className="week-nav__user" onClick={() => setWeekOffset(0)} title="回到本週">{userName}</span>
-            <button className="week-nav__btn" onClick={() => setWeekOffset(w => w + 1)}>›</button>
+            {viewMode === 'week' && (
+              <button className="week-nav__btn" onClick={() => setWeekOffset(w => w + 1)}>›</button>
+            )}
+            <button
+              className={`week-nav__toggle ${viewMode === 'today' ? 'active' : ''}`}
+              onClick={() => setViewMode(v => v === 'week' ? 'today' : 'week')}
+              title={viewMode === 'week' ? '切換到當天' : '切換到一週'}
+            >{viewMode === 'week' ? '當天' : '一週'}</button>
           </div>
-          {displayDates.map(date => (
+          {visibleDates.map(date => (
             <DayColumn
               key={date}
               dayKey={date}

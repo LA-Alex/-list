@@ -15,7 +15,7 @@ export const getWeekDates = (weekOffset: number): string[] => {
   const dow = today.day(); // 0=Sun
   const daysFromMonday = dow === 0 ? 6 : dow - 1;
   const monday = today.subtract(daysFromMonday, "day").add(weekOffset * 7, "day");
-  return Array.from({ length: 5 }, (_, i) => monday.add(i, "day").format("YYYY-MM-DD"));
+  return Array.from({ length: 7 }, (_, i) => monday.add(i, "day").format("YYYY-MM-DD"));
 };
 
 // kintone 記錄 → WorkRow
