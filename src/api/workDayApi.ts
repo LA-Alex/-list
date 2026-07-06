@@ -395,7 +395,7 @@ export const fetchKintoneUsers = async (): Promise<{ code: string; name: string 
   }
   return all
     .filter((u: any) => u.valid === true)
-    .sort((a: any, b: any) => Number(a.id) - Number(b.id))
+    .sort((a: any, b: any) => Number(a.sortOrder) - Number(b.sortOrder))
     .map((u: any) => ({ code: u.code, name: u.name }));
 };
 
