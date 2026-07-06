@@ -3,6 +3,7 @@ export type SourceRecord = {
   標籤: string;
   標籤類別: string;
   更新時間: string;
+  最後取用時間: string;
 };
 
 export type WorkRow = {
@@ -43,21 +44,5 @@ export type WorkDayRecord = {
 
 export type DayType = string; // YYYY-MM-DD
 
-export const 時段Options = ['AM', 'PM'];
-export const 地點Options = ['公司', 'WFH', 'OnSite'];
-export const 工作性質Options = [
-  '會議、視訊',
-  '業助、連絡',
-  '業務、電訪',
-  '報價、合約',
-  '外訪、來訪',
-  '行銷、企劃',
-  '需求·POC',
-  '顧問、客製、技研',
-  '驗證及確認(V&V)',
-  '總務、財務',
-  '其他',
-];
-export const 產品大類Options = ['ASPROVA', 'KINTONE', 'QLIK', 'OTRS', 'ERWIN', 'SI開發'];
-export const 交辦Options = ['交辦中', '完成', '結案'];
-export const 完成Options = ['預定', '部分', '完成'];
+
+

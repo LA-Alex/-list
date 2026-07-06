@@ -1,5 +1,15 @@
+import { useState } from 'react';
 import { DispatchedTask } from '../../types';
 import './DispatchPanel.css';
+
+type DeadlineStatus = 'green' | 'orange' | 'red';
+
+const getDeadlineStatus = (due: string): DeadlineStatus => {
+  const today = new Date().toISOString().slice(0, 10);
+  if (!due || due >= today) return 'green';
+  const daysLate = Math.floor((new Date(today).getTime() - new Date(due).getTime()) / 86400000);
+  return daysLate <= 3 ? 'orange' : 'red';
+};
 
 type Props = {
   tasks: DispatchedTask[];
@@ -12,19 +22,39 @@ const openRecord = (recordId: string) => {
 };
 
 const DispatchPanel = ({ tasks, onConfirm }: Props) => {
-  const pendingCount = tasks.filter(t => t.交辦 !== '完成').length;
+  const [filter, setFilter] = useState<'all' | DeadlineStatus>('all');
+
+  const greenCount = tasks.filter(t => getDeadlineStatus(t.交辦到期日) === 'green').length;
+  const orangeCount = tasks.filter(t => getDeadlineStatus(t.交辦到期日) === 'orange').length;
+  const redCount = tasks.filter(t => getDeadlineStatus(t.交辦到期日) === 'red').length;
+
+  const visibleTasks = filter === 'all'
+    ? tasks
+    : tasks.filter(t => getDeadlineStatus(t.交辦到期日) === filter);
+
+  const toggle = (s: DeadlineStatus) => setFilter(f => f === s ? 'all' : s);
 
   return (
     <div className="dispatch-panel">
       <div className="dispatch-panel__header">
-        指派任務
-        {pendingCount > 0 && <span className="dispatch-panel__count">{pendingCount}</span>}
+        <span>指派任務</span>
+        <div className="panel-filter-group">
+          {greenCount > 0 && (
+            <button className={`panel-filter-btn green ${filter === 'green' ? 'active' : ''}`} onClick={() => toggle('green')}>{greenCount}</button>
+          )}
+          {orangeCount > 0 && (
+            <button className={`panel-filter-btn orange ${filter === 'orange' ? 'active' : ''}`} onClick={() => toggle('orange')}>{orangeCount}</button>
+          )}
+          {redCount > 0 && (
+            <button className={`panel-filter-btn red ${filter === 'red' ? 'active' : ''}`} onClick={() => toggle('red')}>{redCount}</button>
+          )}
+        </div>
       </div>
       <div className="dispatch-panel__list">
-        {tasks.length === 0 ? (
-          <div className="dispatch-panel__empty">無指派中任務</div>
+        {visibleTasks.length === 0 ? (
+          <div className="dispatch-panel__empty">{filter === 'all' ? '無指派中任務' : '此分類無資料'}</div>
         ) : (
-          tasks.map((task) => (
+          visibleTasks.map((task) => (
             <div
               key={task.subtableId}
               className={`dispatch-card ${task.交辦 === '完成' ? 'reported' : ''}`}
@@ -51,7 +81,9 @@ const DispatchPanel = ({ tasks, onConfirm }: Props) => {
                 <div className="dispatch-card__date">交辦日：{task.交辦日}</div>
               )}
               {task.交辦到期日 && (
-                <div className="dispatch-card__date">到期：{task.交辦到期日}</div>
+                <div className={`dispatch-card__date ${getDeadlineStatus(task.交辦到期日) !== 'green' ? `overdue-${getDeadlineStatus(task.交辦到期日)}` : ''}`}>
+                  到期：{task.交辦到期日}
+                </div>
               )}
               <div className="dispatch-card__footer">
                 {task.交辦 === '完成' ? (

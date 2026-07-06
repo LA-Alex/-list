@@ -1,6 +1,16 @@
+import { useState } from 'react';
 import { AssignedRow } from '../../types';
 import AssignedCard from './AssignedCard';
 import './AssignedPanel.css';
+
+type DeadlineStatus = 'green' | 'orange' | 'red';
+
+const getDeadlineStatus = (due: string): DeadlineStatus => {
+  const today = new Date().toISOString().slice(0, 10);
+  if (!due || due >= today) return 'green';
+  const daysLate = Math.floor((new Date(today).getTime() - new Date(due).getTime()) / 86400000);
+  return daysLate <= 3 ? 'orange' : 'red';
+};
 
 type Props = {
   rows: AssignedRow[];
@@ -8,21 +18,39 @@ type Props = {
 };
 
 const AssignedPanel = ({ rows, onComplete }: Props) => {
-  const pendingCount = rows.filter(r => r.交辦 !== '完成').length;
+  const [filter, setFilter] = useState<'all' | DeadlineStatus>('all');
+
+  const greenCount = rows.filter(r => getDeadlineStatus(r.交辦到期日) === 'green').length;
+  const orangeCount = rows.filter(r => getDeadlineStatus(r.交辦到期日) === 'orange').length;
+  const redCount = rows.filter(r => getDeadlineStatus(r.交辦到期日) === 'red').length;
+
+  const visibleRows = filter === 'all'
+    ? rows
+    : rows.filter(r => getDeadlineStatus(r.交辦到期日) === filter);
+
+  const toggle = (s: DeadlineStatus) => setFilter(f => f === s ? 'all' : s);
 
   return (
     <div className="assigned-panel">
       <div className="assigned-panel__header">
-        交辦任務
-        {pendingCount > 0 && (
-          <span className="assigned-panel__count">{pendingCount}</span>
-        )}
+        <span>交辦任務</span>
+        <div className="panel-filter-group">
+          {greenCount > 0 && (
+            <button className={`panel-filter-btn green ${filter === 'green' ? 'active' : ''}`} onClick={() => toggle('green')}>{greenCount}</button>
+          )}
+          {orangeCount > 0 && (
+            <button className={`panel-filter-btn orange ${filter === 'orange' ? 'active' : ''}`} onClick={() => toggle('orange')}>{orangeCount}</button>
+          )}
+          {redCount > 0 && (
+            <button className={`panel-filter-btn red ${filter === 'red' ? 'active' : ''}`} onClick={() => toggle('red')}>{redCount}</button>
+          )}
+        </div>
       </div>
       <div className="assigned-panel__list">
-        {rows.length === 0 ? (
-          <div className="assigned-panel__empty">無待辦交辦</div>
+        {visibleRows.length === 0 ? (
+          <div className="assigned-panel__empty">{filter === 'all' ? '無待辦交辦' : '此分類無資料'}</div>
         ) : (
-          rows.map((row, i) => (
+          visibleRows.map((row, i) => (
             <AssignedCard
               key={row.subtableId || i}
               row={row}

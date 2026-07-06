@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { WorkRow, DayType } from '../../types';
+import { fetchAppFieldOptions } from '../../api/fieldOptionsApi';
+
+const WORK_DAY_APP_ID = 1525;
 import WorkCard from './WorkCard';
 import './DayColumn.css';
 
@@ -16,9 +19,9 @@ type Props = {
   scheduledOutTime?: string;
   clockOutTime?: string;
   isToday?: boolean;
-  onAdd: (dayKey: DayType) => void;
-  onDelete: (dayKey: DayType, subtableId: string) => void;
-  onSave: (dayKey: DayType, updatedRow: WorkRow) => void;
+  onAdd?: (dayKey: DayType) => void;
+  onDelete?: (dayKey: DayType, subtableId: string) => void;
+  onSave?: (dayKey: DayType, updatedRow: WorkRow) => void;
   onCopy?: (row: WorkRow) => void;
   onClockIn?: () => Promise<void>;
   onClockOut?: () => Promise<void>;
@@ -31,6 +34,13 @@ const DOW = ['週日', '週一', '週二', '週三', '週四', '週五', '週六
 const DayColumn = ({ dayKey, date, rows, recordId, selectedSourceIds, scheduledTime, clockInTime, scheduledOutTime, clockOutTime, isToday, onAdd, onDelete, onSave, onCopy, onClockIn, onClockOut, workLocation, onWorkLocationChange }: Props) => {
   const [isClocking, setIsClocking] = useState(false);
   const [isClockingOut, setIsClockingOut] = useState(false);
+  const [locationOptions, setLocationOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchAppFieldOptions(WORK_DAY_APP_ID)
+      .then(opts => { if (opts['工作地點']) setLocationOptions(opts['工作地點']); })
+      .catch(() => {});
+  }, []);
   const { setNodeRef, isOver } = useDroppable({ id: `droppable-${dayKey}` });
   const sortableIds = rows.map(r => `work-${dayKey}-${r.subtableId}`);
 
@@ -94,9 +104,7 @@ const DayColumn = ({ dayKey, date, rows, recordId, selectedSourceIds, scheduledT
               onChange={e => onWorkLocationChange(e.target.value)}
             >
               <option value=""></option>
-              <option value="公司">公司</option>
-              <option value="WFH">WFH</option>
-              <option value="OnSite">OnSite</option>
+              {locationOptions.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
           </span>
         )}
@@ -120,11 +128,13 @@ const DayColumn = ({ dayKey, date, rows, recordId, selectedSourceIds, scheduledT
           </button>
         )}
 
-        <button
-          className={`day-column__add ${selectedSourceIds.length === 0 ? 'disabled' : ''}`}
-          onClick={() => onAdd(dayKey)}
-          title={selectedSourceIds.length === 0 ? '請先在左邊選取項目' : '新增'}
-        >＋</button>
+        {onAdd && (
+          <button
+            className={`day-column__add ${selectedSourceIds.length === 0 ? 'disabled' : ''}`}
+            onClick={() => onAdd(dayKey)}
+            title={selectedSourceIds.length === 0 ? '請先在左邊選取項目' : '新增'}
+          >＋</button>
+        )}
 
         <span style={{ flex: 1 }} />
         {recordId && <span className="day-column__link" onClick={handleDateClick}>→</span>}
@@ -137,9 +147,9 @@ const DayColumn = ({ dayKey, date, rows, recordId, selectedSourceIds, scheduledT
               key={row.subtableId}
               row={row}
               dayKey={dayKey}
-              onDelete={(id) => onDelete(dayKey, id)}
-              onSave={(updated) => onSave(dayKey, updated)}
-              onCopy={() => onCopy?.(row)}
+              onDelete={onDelete ? (id) => onDelete(dayKey, id) : undefined}
+              onSave={onSave ? (updated) => onSave(dayKey, updated) : undefined}
+              onCopy={onCopy ? () => onCopy(row) : undefined}
             />
           ))}
         </SortableContext>

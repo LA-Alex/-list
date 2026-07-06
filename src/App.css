@@ -76,6 +76,25 @@
   border-color: #1677ff;
 }
 
+.week-nav__user-select {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+  cursor: pointer;
+  outline: none;
+  text-align: center;
+}
+
+.week-nav__user-select.other {
+  color: #1677ff;
+}
+
+.week-nav__user-select:focus {
+  color: #4a90d9;
+}
+
 
 .app-loading {
   display: flex;

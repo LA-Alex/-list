@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { 交辦Options } from '../../types';
+import { useState, useEffect } from 'react';
+import { fetchAppFieldOptions } from '../../api/fieldOptionsApi';
 import './AddModal.css';
+
+const WORK_DAY_APP_ID = 1525;
 
 type FormData = {
   交辦: string;
@@ -17,6 +19,14 @@ type Props = {
 const today = new Date().toISOString().slice(0, 10);
 
 const AddModal = ({ onConfirm, onCancel }: Props) => {
+  const [交辦Options, set交辦Options] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchAppFieldOptions(WORK_DAY_APP_ID)
+      .then(opts => { if (opts['交辦']) set交辦Options(opts['交辦']); })
+      .catch(() => {});
+  }, []);
+
   const [form, setForm] = useState<FormData>({
     交辦: '交辦中',
     交辦日: today,

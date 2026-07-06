@@ -80,10 +80,14 @@ const rowToKintone = (r: WorkRow, index: number) => ({
 // 抓指定日期的工作記錄（5天）
 export const fetchWorkDayRecords = async (
   dates: string[],
+  userCode?: string,
 ): Promise<Record<string, WorkDayRecord>> => {
-  const user = kintone.getLoginUser();
+  const loginUser = kintone.getLoginUser();
+  const code = userCode ?? loginUser.code;
+  const isOwn = code === loginUser.code;
+
   const cond = dates.map((d) => `工作日 = "${d}"`).join(" or ");
-  const query = `(${cond}) and 使用者 in ("${user.code}")`;
+  const query = `(${cond}) and 使用者 in ("${code}")`;
 
   const resp = await kintone.api(
     kintone.api.url("/k/v1/records.json", true),
@@ -98,7 +102,13 @@ export const fetchWorkDayRecords = async (
 
   const result: Record<string, WorkDayRecord> = {};
   for (const date of dates) {
-    result[date] = recordMap[date] ?? (await createWorkDayRecord(date, user.code));
+    if (recordMap[date]) {
+      result[date] = recordMap[date];
+    } else if (isOwn) {
+      result[date] = await createWorkDayRecord(date, code);
+    } else {
+      result[date] = { id: null, 工作日: date, rows: [], 上班時間: '', 上班打卡: '', 下班時間: '', 下班打卡: '', 工作地點: '' };
+    }
   }
   return result;
 };
@@ -255,10 +265,11 @@ export const moveRowBetweenDays = async (
     },
   });
 };
-// 指派任務面板：抓出自己派給別人的所有任務（不限三天）
-export const fetchDispatchedTasks = async (): Promise<DispatchedTask[]> => {
+// 指派任務面板：抓出指定使用者派給別人的所有任務
+export const fetchDispatchedTasks = async (userCode?: string): Promise<DispatchedTask[]> => {
   const user = kintone.getLoginUser();
-  const query = `使用者 in ("${user.code}") order by 工作日 desc limit 100`;
+  const targetCode = userCode ?? user.code;
+  const query = `使用者 in ("${targetCode}") order by 工作日 desc limit 100`;
 
   const resp = await kintone.api(
     kintone.api.url("/k/v1/records.json", true),
@@ -301,9 +312,10 @@ export const confirmTask = async (
   });
 };
 
-// 抓交辦給當前使用者的任務（不限日期，交辦未完成就持續顯示）
-export const fetchAssignedRows = async (): Promise<AssignedRow[]> => {
+// 抓交辦給指定使用者的任務（不限日期，交辦未完成就持續顯示）
+export const fetchAssignedRows = async (userCode?: string): Promise<AssignedRow[]> => {
   const user = kintone.getLoginUser();
+  const targetCode = userCode ?? user.code;
   const query = `order by 工作日 desc limit 100`;
 
   const resp = await kintone.api(
@@ -320,7 +332,7 @@ export const fetchAssignedRows = async (): Promise<AssignedRow[]> => {
     const matching = rows
       .filter(
         (r: WorkRow) =>
-          r.關聯者.some((u) => u.code === user.code) &&
+          r.關聯者.some((u) => u.code === targetCode) &&
           r.交辦 !== "完成" &&
           r.交辦 !== "結案",
       )
@@ -366,14 +378,44 @@ export const updateWorkLocation = async (
   });
 };
 
-// 抓 Kintone 使用者列表（供關聯者選人用）
+// 抓 Kintone 使用者列表（只取使用中 valid=true，依 id 排序，分頁上限 100）
 export const fetchKintoneUsers = async (): Promise<{ code: string; name: string }[]> => {
-  const resp = await kintone.api(
-    kintone.api.url("/v1/users.json", true),
-    "GET",
-    { size: 100 },
+  const all: any[] = [];
+  let offset = 0;
+  while (true) {
+    const resp = await kintone.api(
+      kintone.api.url("/v1/users.json", true),
+      "GET",
+      { size: 100, offset },
+    );
+    const page: any[] = resp.users || [];
+    all.push(...page);
+    if (page.length < 100) break;
+    offset += 100;
+  }
+  return all
+    .filter((u: any) => u.valid === true)
+    .sort((a: any, b: any) => Number(a.id) - Number(b.id))
+    .map((u: any) => ({ code: u.code, name: u.name }));
+};
+
+// 只抓在 App 1525 有記錄的使用者（使用中帳號）
+export const fetchActiveUsers = async (): Promise<{ code: string; name: string }[]> => {
+  const [recordsResp, usersResp] = await Promise.all([
+    kintone.api(kintone.api.url('/k/v1/records.json', true), 'GET', {
+      app: APP_ID,
+      query: 'limit 500',
+      fields: ['使用者'],
+    }),
+    kintone.api(kintone.api.url('/v1/users.json', true), 'GET', { size: 100 }),
+  ]);
+  const activeCodes = new Set<string>(
+    recordsResp.records.flatMap((r: any) => (r.使用者?.value || []).map((u: any) => u.code))
   );
-  return (resp.users || []).map((u: any) => ({ code: u.code, name: u.name }));
+  return (usersResp.users || [])
+    .filter((u: any) => u.valid === true && activeCodes.has(u.code))
+    .sort((a: any, b: any) => Number(a.id) - Number(b.id))
+    .map((u: any) => ({ code: u.code, name: u.name }));
 };
 
 // 下班打卡
@@ -394,30 +436,45 @@ export const clockOut = async (
 };
 
 // 上班打卡
+const COMPANY_IP = "61.219.118.205";
+
+const detectCompanyNetwork = async (): Promise<boolean> => {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3000);
+    const resp = await fetch("https://api.ipify.org?format=json", { signal: ctrl.signal });
+    clearTimeout(timer);
+    const data = await resp.json();
+    return data.ip === COMPANY_IP;
+  } catch {
+    return false;
+  }
+};
+
 export const clockIn = async (
   record: WorkDayRecord,
-): Promise<{ time: string; location: string }> => {
-  // 1. 抓目前時間
+): Promise<{ time: string; location: string; isCompany: boolean }> => {
   const now = dayjs().format("HH:mm");
 
-  // 2. 抓 GPS
-  const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(resolve, reject, {
-      timeout: 10000,
-      enableHighAccuracy: true,
-    });
-  });
+  // 並行：偵測公司 IP + 抓 GPS
+  const [isCompany, position] = await Promise.all([
+    detectCompanyNetwork(),
+    new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        timeout: 10000,
+        enableHighAccuracy: true,
+      });
+    }),
+  ]);
 
   const { latitude, longitude } = position.coords;
 
-  // 3. 反向地理編碼（經緯度 → 地址）
   const geoResp = await fetch(
     `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
   );
   const geoData = await geoResp.json();
   const location = geoData.display_name || `${latitude},${longitude}`;
 
-  // 4. 存到 kintone
   await kintone.api(kintone.api.url("/k/v1/record.json", true), "PUT", {
     app: APP_ID,
     id: record.id,
@@ -427,5 +484,5 @@ export const clockIn = async (
     },
   });
 
-  return { time: now, location };
+  return { time: now, location, isCompany };
 };

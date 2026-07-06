@@ -11,12 +11,12 @@ import {
 import { arrayMove } from '@dnd-kit/sortable';
 
 import { SourceRecord, WorkDayRecord, WorkRow, DayType, AssignedRow, DispatchedTask } from './types';
-import { getSourceRecords } from './api/app1094Api';
+import { getSourceRecords, updateSourceLastUsed } from './api/app1094Api';
 import {
   fetchWorkDayRecords, getWeekDates, getTodayDate, addRowToWorkDay,
   updateRowOrder, moveRowBetweenDays, deleteRow, updateRow,
   fetchAssignedRows, setRowComplete,
-  fetchDispatchedTasks, confirmTask,
+  fetchDispatchedTasks, confirmTask, fetchKintoneUsers,
 } from './api/workDayApi';
 
 import LeftPanel from './components/LeftPanel/LeftPanel';
@@ -39,10 +39,15 @@ const App = () => {
   const [workLocation, setWorkLocation] = useState<string>('');
   const [weekOffset, setWeekOffset] = useState(0);
   const [viewMode, setViewMode] = useState<'week' | 'today'>('week');
+  const [viewUsers, setViewUsers] = useState<{ code: string; name: string }[]>([]);
+  const [viewUserIdx, setViewUserIdx] = useState(0);
   const todayDate = getTodayDate();
   const displayDates = getWeekDates(weekOffset);
   const visibleDates = viewMode === 'today' ? [todayDate] : displayDates;
-  const userName = kintone.getLoginUser().name;
+  const loginUser = kintone.getLoginUser();
+  const userName = loginUser.name;
+  const viewUser = viewUsers[viewUserIdx] ?? { code: loginUser.code, name: loginUser.name };
+  const isViewingSelf = viewUser.code === loginUser.code;
 
   const sensors = useSensors(useSensor(PointerSensor, {
     activationConstraint: { distance: 5 },
@@ -51,17 +56,20 @@ const App = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        const [sources, days, assigned, dispatched] = await Promise.all([
+        const [sources, days, assigned, dispatched, allUsers] = await Promise.all([
           getSourceRecords(),
           fetchWorkDayRecords(getWeekDates(weekOffset)),
           fetchAssignedRows(),
           fetchDispatchedTasks(),
+          fetchKintoneUsers(),
         ]);
         setSourceRecords(sources);
         setWorkDays(days);
         setAssignedRows(assigned);
         setDispatchedTasks(dispatched);
         setWorkLocation(days[todayDate]?.工作地點 || '');
+        const others = allUsers.filter((u: { code: string; name: string }) => u.code !== loginUser.code);
+        setViewUsers([{ code: loginUser.code, name: loginUser.name }, ...others]);
       } catch (e) {
         console.error(e);
       } finally {
@@ -71,21 +79,41 @@ const App = () => {
     init();
   }, []);
 
-  // 週切換時重新載入資料
+  // 週切換或使用者切換時重新載入資料
   useEffect(() => {
     if (loading) return;
     const load = async () => {
+      const targetCode = viewUsers[viewUserIdx]?.code ?? loginUser.code;
+      const isSelf = targetCode === loginUser.code;
       try {
-        const days = await fetchWorkDayRecords(getWeekDates(weekOffset));
+        const [days, assigned, dispatched] = await Promise.all([
+          fetchWorkDayRecords(getWeekDates(weekOffset), targetCode),
+          fetchAssignedRows(isSelf ? undefined : targetCode),
+          fetchDispatchedTasks(isSelf ? undefined : targetCode),
+        ]);
         setWorkDays(days);
+        setAssignedRows(assigned);
+        setDispatchedTasks(dispatched);
       } catch (e) {
         console.error(e);
       }
     };
     load();
-  }, [weekOffset]);
+  }, [weekOffset, viewUserIdx]);
 
   const handleToggleSelect = (id: string) => {
+    if (!selectedSourceIds.includes(id)) {
+      const now = new Date().toISOString();
+      updateSourceLastUsed(id)
+        .then(() => {
+          setSourceRecords(prev => {
+            const rec = prev.find(r => r.id === id);
+            if (!rec) return prev;
+            return [{ ...rec, 最後取用時間: now }, ...prev.filter(r => r.id !== id)];
+          });
+        })
+        .catch(() => {});
+    }
     setSelectedSourceIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
@@ -94,8 +122,12 @@ const App = () => {
   const handleClockIn = async () => {
     if (!workDays?.[todayDate]) return;
     try {
-      const { time } = await clockIn(workDays[todayDate]);
+      const { time, isCompany } = await clockIn(workDays[todayDate]);
       setClockInTime(time);
+      if (isCompany) {
+        setWorkLocation('公司');
+        await updateWorkLocation(workDays[todayDate].id!, '公司');
+      }
     } catch (e) {
       console.error(e);
       alert('打卡失敗，請確認是否允許位置存取！');
@@ -145,7 +177,7 @@ const App = () => {
     }
   };
 
-  const handleCopy = async (fromDayKey: DayType, row: WorkRow, toDayKey: DayType) => {
+  const handleCopy = async (_fromDayKey: DayType, row: WorkRow, toDayKey: DayType) => {
     if (!workDays?.[toDayKey]) return;
     const copyFields: Partial<WorkRow> = {
       產品大類: row.產品大類,
@@ -257,7 +289,7 @@ const App = () => {
       setActiveSource(data.current.record);
     } else if (data.current?.type === 'assigned') {
       const row = data.current.row;
-      setActiveSource({ id: row.subtableId, 標籤: row.來源標籤, 標籤類別: '交辦', 更新時間: '' });
+      setActiveSource({ id: row.subtableId, 標籤: row.來源標籤, 標籤類別: '交辦', 更新時間: '', 最後取用時間: '' });
     } else if (data.current?.type === 'work') {
       setActiveWorkRow({ row: data.current.row, dayKey: data.current.dayKey });
     }
@@ -284,6 +316,19 @@ const App = () => {
         ? `${activeData.row.sourceRecordId}|${activeData.row.subtableId}`
         : undefined;
       const sourceRow = activeData.type === 'assigned' ? activeData.row as WorkRow : undefined;
+      if (activeData.type === 'source') {
+        const srcId = (activeData.record as SourceRecord).id;
+        const now = new Date().toISOString();
+        updateSourceLastUsed(srcId)
+          .then(() => {
+            setSourceRecords(prev => {
+              const rec = prev.find(r => r.id === srcId);
+              if (!rec) return prev;
+              return [{ ...rec, 最後取用時間: now }, ...prev.filter(r => r.id !== srcId)];
+            });
+          })
+          .catch(() => {});
+      }
       await handleAddDirect(targetDay, label, sourceRowRef, sourceRow);
       return;
     }
@@ -354,7 +399,19 @@ const App = () => {
             {viewMode === 'week' && (
               <button className="week-nav__btn" onClick={() => setWeekOffset(w => w - 1)}>‹</button>
             )}
-            <span className="week-nav__user" onClick={() => setWeekOffset(0)} title="回到本週">{userName}</span>
+            {viewUsers.length > 1 ? (
+              <select
+                className={`week-nav__user-select ${!isViewingSelf ? 'other' : ''}`}
+                value={viewUserIdx}
+                onChange={e => setViewUserIdx(Number(e.target.value))}
+              >
+                {viewUsers.map((u, i) => (
+                  <option key={u.code} value={i}>{u.name}</option>
+                ))}
+              </select>
+            ) : (
+              <span className="week-nav__user" onClick={() => setWeekOffset(0)} title="回到本週">{userName}</span>
+            )}
             {viewMode === 'week' && (
               <button className="week-nav__btn" onClick={() => setWeekOffset(w => w + 1)}>›</button>
             )}
@@ -389,10 +446,10 @@ const App = () => {
               onDelete={handleDelete}
               onSave={handleSave}
               onCopy={(row) => handleCopy(date, row, todayDate)}
-              onClockIn={date === todayDate ? handleClockIn : undefined}
-              onClockOut={date === todayDate ? handleClockOut : undefined}
-              workLocation={date === todayDate ? workLocation : undefined}
-              onWorkLocationChange={date === todayDate ? handleWorkLocationChange : undefined}
+              onClockIn={isViewingSelf && date === todayDate ? handleClockIn : undefined}
+              onClockOut={isViewingSelf && date === todayDate ? handleClockOut : undefined}
+              workLocation={isViewingSelf && date === todayDate ? workLocation : undefined}
+              onWorkLocationChange={isViewingSelf && date === todayDate ? handleWorkLocationChange : undefined}
             />
           ))}
         </div>
