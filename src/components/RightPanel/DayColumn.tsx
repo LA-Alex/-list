@@ -6,7 +6,7 @@ import { fetchAppFieldOptions } from '../../api/fieldOptionsApi';
 
 const WORK_DAY_APP_ID = 1525;
 import WorkCard from './WorkCard';
-import './DayColumn.css';
+import '../../../DayColumn.css';
 
 type Props = {
   dayKey: DayType;

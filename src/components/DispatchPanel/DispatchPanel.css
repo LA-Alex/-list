@@ -48,6 +48,12 @@
 .overdue-orange { color: #d46b08; font-weight: 700; }
 .overdue-red    { color: #ff4d4f; font-weight: 700; }
 
+.dispatch-panel__filterbar {
+  padding: 8px 16px 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .dispatch-panel__list {
   padding: 10px;
   overflow-y: auto;

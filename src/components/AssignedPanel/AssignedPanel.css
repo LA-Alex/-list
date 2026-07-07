@@ -44,6 +44,12 @@
 .panel-filter-btn.orange { background: #fa8c16; color: #fff; }
 .panel-filter-btn.red    { background: #ff4d4f; color: #fff; }
 
+.assigned-panel__filterbar {
+  padding: 8px 16px 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .assigned-panel__list {
   padding: 10px;
   overflow-y: auto;
@@ -160,4 +166,11 @@
 .assigned-card__due.overdue {
   color: #d9534f;
   font-weight: 600;
+}
+
+.assigned-card__assigner {
+  font-size: 12px;
+  color: #7c5cbf;
+  font-weight: 600;
+  margin-left: auto;
 }

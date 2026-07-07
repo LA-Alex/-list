@@ -328,6 +328,7 @@ export const fetchAssignedRows = async (userCode?: string): Promise<AssignedRow[
 
   for (const record of resp.records) {
     const sourceRecordId: string = record.$id.value;
+    const assigner = (record.使用者?.value || [])[0];
     const rows = (record.工作表格?.value || []).map(parseRow);
     const matching = rows
       .filter(
@@ -336,7 +337,12 @@ export const fetchAssignedRows = async (userCode?: string): Promise<AssignedRow[
           r.交辦 !== "完成" &&
           r.交辦 !== "結案",
       )
-      .map((r: WorkRow): AssignedRow => ({ ...r, sourceRecordId }));
+      .map((r: WorkRow): AssignedRow => ({
+        ...r,
+        sourceRecordId,
+        assignerCode: assigner?.code || "",
+        assignerName: assigner?.name || "",
+      }));
     result.push(...matching);
   }
 

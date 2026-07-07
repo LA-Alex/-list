@@ -25,8 +25,12 @@ export type WorkRow = {
   來源列ID: string;
 };
 
-// 交辦面板用，帶有來源 record ID（用於 B 回報完成時更新 A 的記錄）
-export type AssignedRow = WorkRow & { sourceRecordId: string };
+// 交辦面板用，帶有來源 record ID（用於 B 回報完成時更新 A 的記錄）與交辦人資訊
+export type AssignedRow = WorkRow & {
+  sourceRecordId: string;
+  assignerCode: string;
+  assignerName: string;
+};
 
 // 指派任務面板用，帶有所屬 record ID
 export type DispatchedTask = WorkRow & { recordId: string };

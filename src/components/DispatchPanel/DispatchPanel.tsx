@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { DispatchedTask } from '../../types';
+import MultiSelectDropdown from '../common/MultiSelectDropdown';
 import './DispatchPanel.css';
 
 type DeadlineStatus = 'green' | 'orange' | 'red';
@@ -23,14 +24,21 @@ const openRecord = (recordId: string) => {
 
 const DispatchPanel = ({ tasks, onConfirm }: Props) => {
   const [filter, setFilter] = useState<'all' | DeadlineStatus>('all');
+  const [assigneeFilter, setAssigneeFilter] = useState<string[]>([]);
 
   const greenCount = tasks.filter(t => getDeadlineStatus(t.交辦到期日) === 'green').length;
   const orangeCount = tasks.filter(t => getDeadlineStatus(t.交辦到期日) === 'orange').length;
   const redCount = tasks.filter(t => getDeadlineStatus(t.交辦到期日) === 'red').length;
 
-  const visibleTasks = filter === 'all'
-    ? tasks
-    : tasks.filter(t => getDeadlineStatus(t.交辦到期日) === filter);
+  const assigneeOptions = Array.from(
+    new Map(
+      tasks.flatMap(t => t.關聯者).map(u => [u.code, { code: u.code, name: u.name }]),
+    ).values(),
+  );
+
+  const visibleTasks = tasks
+    .filter(t => filter === 'all' || getDeadlineStatus(t.交辦到期日) === filter)
+    .filter(t => assigneeFilter.length === 0 || t.關聯者.some(u => assigneeFilter.includes(u.code)));
 
   const toggle = (s: DeadlineStatus) => setFilter(f => f === s ? 'all' : s);
 
@@ -50,6 +58,16 @@ const DispatchPanel = ({ tasks, onConfirm }: Props) => {
           )}
         </div>
       </div>
+      {assigneeOptions.length > 0 && (
+        <div className="dispatch-panel__filterbar">
+          <MultiSelectDropdown
+            label="指派給"
+            options={assigneeOptions}
+            selected={assigneeFilter}
+            onChange={setAssigneeFilter}
+          />
+        </div>
+      )}
       <div className="dispatch-panel__list">
         {visibleTasks.length === 0 ? (
           <div className="dispatch-panel__empty">{filter === 'all' ? '無指派中任務' : '此分類無資料'}</div>

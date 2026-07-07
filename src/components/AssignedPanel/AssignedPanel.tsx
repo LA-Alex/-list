@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AssignedRow } from '../../types';
 import AssignedCard from './AssignedCard';
+import MultiSelectDropdown from '../common/MultiSelectDropdown';
 import './AssignedPanel.css';
 
 type DeadlineStatus = 'green' | 'orange' | 'red';
@@ -19,14 +20,19 @@ type Props = {
 
 const AssignedPanel = ({ rows, onComplete }: Props) => {
   const [filter, setFilter] = useState<'all' | DeadlineStatus>('all');
+  const [assignerFilter, setAssignerFilter] = useState<string[]>([]);
 
   const greenCount = rows.filter(r => getDeadlineStatus(r.交辦到期日) === 'green').length;
   const orangeCount = rows.filter(r => getDeadlineStatus(r.交辦到期日) === 'orange').length;
   const redCount = rows.filter(r => getDeadlineStatus(r.交辦到期日) === 'red').length;
 
-  const visibleRows = filter === 'all'
-    ? rows
-    : rows.filter(r => getDeadlineStatus(r.交辦到期日) === filter);
+  const assignerOptions = Array.from(
+    new Map(rows.map(r => [r.assignerCode, { code: r.assignerCode, name: r.assignerName }])).values(),
+  ).filter(o => o.code);
+
+  const visibleRows = rows
+    .filter(r => filter === 'all' || getDeadlineStatus(r.交辦到期日) === filter)
+    .filter(r => assignerFilter.length === 0 || assignerFilter.includes(r.assignerCode));
 
   const toggle = (s: DeadlineStatus) => setFilter(f => f === s ? 'all' : s);
 
@@ -46,6 +52,16 @@ const AssignedPanel = ({ rows, onComplete }: Props) => {
           )}
         </div>
       </div>
+      {assignerOptions.length > 0 && (
+        <div className="assigned-panel__filterbar">
+          <MultiSelectDropdown
+            label="交辦人"
+            options={assignerOptions}
+            selected={assignerFilter}
+            onChange={setAssignerFilter}
+          />
+        </div>
+      )}
       <div className="assigned-panel__list">
         {visibleRows.length === 0 ? (
           <div className="assigned-panel__empty">{filter === 'all' ? '無待辦交辦' : '此分類無資料'}</div>

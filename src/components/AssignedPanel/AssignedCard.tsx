@@ -61,6 +61,9 @@ const AssignedCard = ({ row, onComplete }: Props) => {
             到期 {row.交辦到期日}
           </span>
         )}
+        {row.assignerName && (
+          <span className="assigned-card__assigner">指派人：{row.assignerName}</span>
+        )}
       </div>
     </div>
   );
