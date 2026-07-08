@@ -276,6 +276,25 @@
   color: #d46b08;
 }
 
+.work-card__tag--content {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+.work-card__tag--link {
+  color: #1677ff;
+  background: #e8f0fe;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.work-card__tag--link:hover {
+  background: #bdd5ff;
+  text-decoration: underline;
+}
+
 .work-card.locked {
   opacity: 0.75;
   cursor: default;
@@ -522,5 +541,56 @@
 }
 
 .modal-ref-link-inline:hover {
+  text-decoration: underline;
+}
+
+/* 搜尋選取後的連結列表 */
+.modal-linked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.modal-linked-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0f5ff;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.modal-linked-item a {
+  flex: 1;
+  color: #1677ff;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.modal-linked-item a:hover {
+  text-decoration: underline;
+}
+
+/* 內容欄位 view 模式 */
+.modal-content-view {
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 13px;
+  background: #fafbfc;
+  color: #333;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.modal-content-link {
+  color: #1677ff;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.modal-content-link:hover {
   text-decoration: underline;
 }

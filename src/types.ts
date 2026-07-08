@@ -10,6 +10,7 @@ export type WorkRow = {
   subtableId: string;
   來源標籤: string;
   內容: string;
+  連結: string;
   地點: string;
   交辦MEMO: string;
   排序: number;

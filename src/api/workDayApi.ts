@@ -3,6 +3,29 @@ import { WorkDayRecord, WorkRow, DayType, AssignedRow, DispatchedTask } from "..
 
 const APP_ID = 1525;
 
+// 清除不可見字元（Kintone 欄位代碼可能夾帶）
+const cleanCode = (s: string) => s.replace(/[​‌‍﻿­]/g, '');
+
+// 實際欄位代碼快取：clean → actual（含不可見字元的原始代碼）
+let _fieldCodeMap: Record<string, string> = {};
+
+const ensureFieldCodeMap = async (): Promise<void> => {
+  if (Object.keys(_fieldCodeMap).length > 0) return;
+  try {
+    const resp = await kintone.api(kintone.api.url('/k/v1/app/form/fields', true), 'GET', { app: APP_ID });
+    const extract = (props: Record<string, any>) => {
+      for (const field of Object.values(props)) {
+        if (field.code) _fieldCodeMap[cleanCode(field.code)] = field.code;
+        if (field.type === 'SUBTABLE' && field.fields) extract(field.fields);
+      }
+    };
+    extract(resp.properties);
+  } catch {}
+};
+
+// 取得含不可見字元的實際欄位代碼，找不到時回傳原本傳入的字串
+const fc = (clean: string) => _fieldCodeMap[clean] || clean;
+
 export const getDayDate = (day: DayType): string => {
   const offset = day === "yesterday" ? -1 : day === "today" ? 0 : 1;
   return dayjs().add(offset, "day").format("YYYY-MM-DD");
@@ -18,28 +41,32 @@ export const getWeekDates = (weekOffset: number): string[] => {
   return Array.from({ length: 7 }, (_, i) => monday.add(i, "day").format("YYYY-MM-DD"));
 };
 
-// kintone 記錄 → WorkRow
-const parseRow = (row: any): WorkRow => ({
-  subtableId: row.id,
-  來源標籤: row.value.來源標籤?.value || "",
-  內容: row.value.內容?.value || "",
-  地點: row.value.地點?.value || "",
-  交辦MEMO: row.value.交辦MEMO?.value || "",
-  排序: Number(row.value.排序?.value) || 0,
-  時段: row.value.時段?.value || "",
-  工作性質: row.value.工作性質?.value || [],
-  產品大類: row.value.產品大類?.value || "",
-  關聯者: (row.value.關聯者?.value || []).map((u: any) => ({
-    code: u.code,
-    name: u.name,
-  })),
-  交辦: row.value.交辦?.value || "",
-  交辦日: row.value.交辦日?.value || "",
-  交辦到期日: row.value.交辦到期日?.value || "",
-  交辦完成日: row.value.交辦完成日?.value || "",
-  完成: row.value.完成?.value || "",
-  來源列ID: row.value.來源列ID?.value || "",
-});
+// kintone 記錄 → WorkRow（先 normalize 欄位代碼 key，避免不可見字元）
+const parseRow = (row: any): WorkRow => {
+  const v: Record<string, any> = {};
+  for (const [k, val] of Object.entries(row.value as Record<string, any>)) {
+    v[cleanCode(k)] = val;
+  }
+  return {
+    subtableId: row.id,
+    來源標籤: v.來源標籤?.value || "",
+    內容: v.內容?.value || "",
+    連結: v.連結?.value || "",
+    地點: v.地點?.value || "",
+    交辦MEMO: v.交辦MEMO?.value || "",
+    排序: Number(v.排序?.value) || 0,
+    時段: v.時段?.value || "",
+    工作性質: v.工作性質?.value || [],
+    產品大類: v.產品大類?.value || "",
+    關聯者: (v.關聯者?.value || []).map((u: any) => ({ code: u.code, name: u.name })),
+    交辦: v.交辦?.value || "",
+    交辦日: v.交辦日?.value || "",
+    交辦到期日: v.交辦到期日?.value || "",
+    交辦完成日: v.交辦完成日?.value || "",
+    完成: v.完成?.value || "",
+    來源列ID: v.來源列ID?.value || "",
+  };
+};
 
 // kintone 記錄 → WorkDayRecord
 const parseRecord = (r: any): WorkDayRecord => ({
@@ -55,25 +82,26 @@ const parseRecord = (r: any): WorkDayRecord => ({
   工作地點: r.工作地點?.value || "",
 });
 
-// WorkRow → kintone 格式
+// WorkRow → kintone 格式（用 fc() 查出含不可見字元的實際代碼）
 const rowToKintone = (r: WorkRow, index: number) => ({
   id: r.subtableId || undefined,
   value: {
-    來源標籤: { value: r.來源標籤 },
-    內容: { value: r.內容 },
-    地點: { value: r.地點 },
-    交辦MEMO: { value: r.交辦MEMO },
-    排序: { value: String(index + 1) },
-    時段: { value: r.時段 },
-    工作性質: { value: r.工作性質 },
-    產品大類: { value: r.產品大類 },
-    關聯者: { value: r.關聯者.map((u) => ({ code: u.code })) },
-    交辦: { value: r.交辦 },
-    交辦日: { value: r.交辦日 || null },
-    交辦到期日: { value: r.交辦到期日 || null },
-    交辦完成日: { value: r.交辦完成日 || null },
-    完成: { value: r.完成 || "" },
-    來源列ID: { value: r.來源列ID || "" },
+    [fc('來源標籤')]: { value: r.來源標籤 },
+    [fc('內容')]: { value: r.內容 },
+    [fc('連結')]: { value: r.連結 },
+    [fc('地點')]: { value: r.地點 },
+    [fc('交辦MEMO')]: { value: r.交辦MEMO },
+    [fc('排序')]: { value: String(index + 1) },
+    [fc('時段')]: { value: r.時段 },
+    [fc('工作性質')]: { value: r.工作性質 },
+    [fc('產品大類')]: { value: r.產品大類 },
+    [fc('關聯者')]: { value: r.關聯者.map((u) => ({ code: u.code })) },
+    [fc('交辦')]: { value: r.交辦 },
+    [fc('交辦日')]: { value: r.交辦日 || null },
+    [fc('交辦到期日')]: { value: r.交辦到期日 || null },
+    [fc('交辦完成日')]: { value: r.交辦完成日 || null },
+    [fc('完成')]: { value: r.完成 || "" },
+    [fc('來源列ID')]: { value: r.來源列ID || "" },
   },
 });
 
@@ -89,11 +117,10 @@ export const fetchWorkDayRecords = async (
   const cond = dates.map((d) => `工作日 = "${d}"`).join(" or ");
   const query = `(${cond}) and 使用者 in ("${code}")`;
 
-  const resp = await kintone.api(
-    kintone.api.url("/k/v1/records.json", true),
-    "GET",
-    { app: APP_ID, query },
-  );
+  const [resp] = await Promise.all([
+    kintone.api(kintone.api.url("/k/v1/records.json", true), "GET", { app: APP_ID, query }),
+    ensureFieldCodeMap(),
+  ]);
 
   const recordMap: Record<string, WorkDayRecord> = {};
   resp.records.forEach((r: any) => {
@@ -158,6 +185,7 @@ export const addRowToWorkDay = async (
       value: {
         來源標籤: { value: sourceLabel },
         內容: { value: sourceRow?.內容 || "" },
+        連結: { value: sourceRow?.連結 || "" },
         地點: { value: sourceRow?.地點 || "" },
         交辦MEMO: { value: sourceRow?.交辦MEMO || "" },
         排序: { value: String(nextOrder) },
