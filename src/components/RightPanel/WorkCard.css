@@ -349,7 +349,7 @@
 .edit-modal-box {
   background: #fff;
   border-radius: 10px;
-  width: 360px;
+  width: 500px;
   max-height: 85vh;
   box-shadow: 0 8px 30px rgba(0,0,0,0.18);
   display: flex;
@@ -379,6 +379,16 @@
   font-weight: 600;
 }
 
+.modal-field-row {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-field-row .modal-field {
+  flex: 1;
+  min-width: 0;
+}
+
 .edit-modal-scroll .modal-field select,
 .edit-modal-scroll .modal-field input,
 .edit-modal-scroll .modal-field textarea {
@@ -402,6 +412,14 @@
 .edit-modal-box .modal-footer {
   padding: 12px 20px;
   border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.edit-modal-box .modal-cancel,
+.edit-modal-box .modal-confirm {
+  padding: 8px 28px;
 }
 
 /* 工作性質 checkbox group */

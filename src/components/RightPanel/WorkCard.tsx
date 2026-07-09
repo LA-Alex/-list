@@ -159,20 +159,22 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
             <div className="edit-modal-title">{ro ? '👁️' : '✏️'} {row.來源標籤}</div>
             <div className="edit-modal-scroll">
 
-              <div className="modal-field">
-                <label>時段</label>
-                <select value={form.時段} disabled={ro} onChange={e => setForm(f => ({ ...f, 時段: e.target.value }))}>
-                  <option value="">請選擇</option>
-                  {(fieldOptions['時段'] ?? []).map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
-              </div>
+              <div className="modal-field-row">
+                <div className="modal-field">
+                  <label>時段</label>
+                  <select value={form.時段} disabled={ro} onChange={e => setForm(f => ({ ...f, 時段: e.target.value }))}>
+                    <option value="">請選擇</option>
+                    {(fieldOptions['時段'] ?? []).map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                </div>
 
-              <div className="modal-field">
-                <label>產品大類</label>
-                <select value={form.產品大類} disabled={ro} onChange={e => setForm(f => ({ ...f, 產品大類: e.target.value }))}>
-                  <option value="">請選擇</option>
-                  {(fieldOptions['產品大類'] ?? []).map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
+                <div className="modal-field">
+                  <label>產品大類</label>
+                  <select value={form.產品大類} disabled={ro} onChange={e => setForm(f => ({ ...f, 產品大類: e.target.value }))}>
+                    <option value="">請選擇</option>
+                    {(fieldOptions['產品大類'] ?? []).map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                </div>
               </div>
 
               <div className="modal-field">
@@ -193,11 +195,6 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
                     {(fieldOptions['工作性質'] ?? []).filter(opt => !form.工作性質.includes(opt)).map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
                 )}
-              </div>
-
-              <div className="modal-field">
-                <label>交辦MEMO</label>
-                <input type="text" disabled={ro} value={form.交辦MEMO} onChange={e => setForm(f => ({ ...f, 交辦MEMO: e.target.value }))} />
               </div>
 
               {!ro && (
@@ -282,19 +279,6 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
               )}
 
               <div className="modal-field">
-                <label>內容</label>
-                {ro ? (
-                  <div className="modal-content-view">
-                    {form.內容.split('\n').map((line, i) => (
-                      <div key={i} style={{ minHeight: '1.2em' }}>{line ? renderWithLinks(line) : ' '}</div>
-                    ))}
-                  </div>
-                ) : (
-                  <textarea value={form.內容} onChange={e => setForm(f => ({ ...f, 內容: e.target.value }))} rows={3} />
-                )}
-              </div>
-
-              <div className="modal-field">
                 <label>連結</label>
                 {ro ? (
                   <div className="modal-content-view">
@@ -313,34 +297,56 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
               </div>
 
               <div className="modal-field">
-                <label>交辦</label>
-                <select value={form.交辦} disabled={ro} onChange={e => setForm(f => ({ ...f, 交辦: e.target.value }))}>
-                  <option value="">請選擇</option>
-                  {(fieldOptions['交辦'] ?? []).map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
+                <label>內容</label>
+                {ro ? (
+                  <div className="modal-content-view">
+                    {form.內容.split('\n').map((line, i) => (
+                      <div key={i} style={{ minHeight: '1.2em' }}>{line ? renderWithLinks(line) : ' '}</div>
+                    ))}
+                  </div>
+                ) : (
+                  <textarea value={form.內容} onChange={e => setForm(f => ({ ...f, 內容: e.target.value }))} rows={3} />
+                )}
               </div>
 
               <div className="modal-field">
-                <label>交辦日</label>
-                <input type="date" disabled={ro} value={form.交辦日} onChange={e => setForm(f => ({ ...f, 交辦日: e.target.value }))} />
+                <label>交辦MEMO</label>
+                <input type="text" disabled={ro} value={form.交辦MEMO} onChange={e => setForm(f => ({ ...f, 交辦MEMO: e.target.value }))} />
               </div>
 
-              <div className="modal-field">
-                <label>交辦到期日</label>
-                <input type="date" disabled={ro} value={form.交辦到期日} onChange={e => setForm(f => ({ ...f, 交辦到期日: e.target.value }))} />
+              <div className="modal-field-row">
+                <div className="modal-field">
+                  <label>交辦</label>
+                  <select value={form.交辦} disabled={ro} onChange={e => setForm(f => ({ ...f, 交辦: e.target.value }))}>
+                    <option value="">請選擇</option>
+                    {(fieldOptions['交辦'] ?? []).map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                </div>
+
+                <div className="modal-field">
+                  <label>完成</label>
+                  <select value={form.完成} disabled={ro} onChange={e => setForm(f => ({ ...f, 完成: e.target.value }))}>
+                    <option value="">請選擇</option>
+                    {(fieldOptions['完成'] ?? []).map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                </div>
               </div>
 
-              <div className="modal-field">
-                <label>交辦完成日</label>
-                <input type="date" disabled={ro} value={form.交辦完成日} onChange={e => setForm(f => ({ ...f, 交辦完成日: e.target.value }))} />
-              </div>
+              <div className="modal-field-row">
+                <div className="modal-field">
+                  <label>交辦日</label>
+                  <input type="date" disabled={ro} value={form.交辦日} onChange={e => setForm(f => ({ ...f, 交辦日: e.target.value }))} />
+                </div>
 
-              <div className="modal-field">
-                <label>完成</label>
-                <select value={form.完成} disabled={ro} onChange={e => setForm(f => ({ ...f, 完成: e.target.value }))}>
-                  <option value="">請選擇</option>
-                  {(fieldOptions['完成'] ?? []).map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
+                <div className="modal-field">
+                  <label>交辦到期日</label>
+                  <input type="date" disabled={ro} value={form.交辦到期日} onChange={e => setForm(f => ({ ...f, 交辦到期日: e.target.value }))} />
+                </div>
+
+                <div className="modal-field">
+                  <label>交辦完成日</label>
+                  <input type="date" disabled={ro} value={form.交辦完成日} onChange={e => setForm(f => ({ ...f, 交辦完成日: e.target.value }))} />
+                </div>
               </div>
 
               <div className="modal-field">
