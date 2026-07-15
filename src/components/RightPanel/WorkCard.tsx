@@ -105,7 +105,10 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
     <div ref={setNodeRef} style={style} className={`work-card ${completed && row.交辦 !== '完成' ? 'reported' : ''} ${completed ? 'locked' : ''}`}>
 
       <div className="work-card__header" {...(completed ? {} : { ...attributes, ...listeners })}>
-        <span className="work-card__label">{row.來源標籤 || '（未命名）'}</span>
+        <span className="work-card__label">
+          {row.來源標籤 || '（未命名）'}
+          {row.來源列ID && <span className="work-card__source-id">{row.來源列ID}</span>}
+        </span>
         <div className="work-card__actions" onPointerDown={e => e.stopPropagation()}>
           {!completed && onSave && (
             <button className="work-card__btn work-card__btn--done" onClick={() => onSave({ ...row, 完成: '完成' })} title="完成">✅</button>
@@ -214,7 +217,7 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
                         className="work-card__user-search"
                       />
                       {focused1477 && (
-                        <div className="work-card__user-dropdown">
+                        <div className="work-card__user-dropdown" onMouseDown={e => e.preventDefault()}>
                           {(search1477
                             ? app1477Records.filter(r => r.應用程式名稱.includes(search1477) || r.Site_APPID.includes(search1477))
                             : app1477Records
@@ -255,7 +258,7 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
                         className="work-card__user-search"
                       />
                       {focused1093 && (
-                        <div className="work-card__user-dropdown">
+                        <div className="work-card__user-dropdown" onMouseDown={e => e.preventDefault()}>
                           {(search1093
                             ? app1093Records.filter(r => r.問題標題.includes(search1093) || `${r.L_P前置詞}${r.Issue_No}`.includes(search1093))
                             : app1093Records

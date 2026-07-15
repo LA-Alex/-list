@@ -26,6 +26,18 @@
   font-size: 16px;
   font-weight: 600;
   color: #1a1a2e;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.work-card__source-id {
+  font-size: 12px;
+  font-weight: 400;
+  color: #888;
+  background: #f0f0f0;
+  border-radius: 3px;
+  padding: 1px 6px;
 }
 
 .work-card__actions {

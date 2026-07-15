@@ -27,12 +27,19 @@ const AssignedPanel = ({ rows, onComplete }: Props) => {
   const redCount = rows.filter(r => getDeadlineStatus(r.交辦到期日) === 'red').length;
 
   const assignerOptions = Array.from(
-    new Map(rows.map(r => [r.assignerCode, { code: r.assignerCode, name: r.assignerName }])).values(),
+    new Map(
+      rows.flatMap(r => {
+        const codes = r.assignerCode ? r.assignerCode.split(',') : [];
+        const names = r.assignerName ? r.assignerName.split('、') : [];
+        return codes.map((code, i) => [code.trim(), { code: code.trim(), name: names[i] || code.trim() }]);
+      })
+    ).values()
   ).filter(o => o.code);
 
   const visibleRows = rows
     .filter(r => filter === 'all' || getDeadlineStatus(r.交辦到期日) === filter)
-    .filter(r => assignerFilter.length === 0 || assignerFilter.includes(r.assignerCode));
+    .filter(r => assignerFilter.length === 0 ||
+      r.assignerCode.split(',').some(code => assignerFilter.includes(code.trim())));
 
   const toggle = (s: DeadlineStatus) => setFilter(f => f === s ? 'all' : s);
 

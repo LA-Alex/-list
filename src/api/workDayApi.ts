@@ -344,34 +344,39 @@ export const confirmTask = async (
 export const fetchAssignedRows = async (userCode?: string): Promise<AssignedRow[]> => {
   const user = kintone.getLoginUser();
   const targetCode = userCode ?? user.code;
-  const query = `order by 工作日 desc limit 100`;
-
-  const resp = await kintone.api(
-    kintone.api.url("/k/v1/records.json", true),
-    "GET",
-    { app: APP_ID, query },
-  );
 
   const result: AssignedRow[] = [];
+  let offset = 0;
 
-  for (const record of resp.records) {
-    const sourceRecordId: string = record.$id.value;
-    const assigner = (record.使用者?.value || [])[0];
-    const rows = (record.工作表格?.value || []).map(parseRow);
-    const matching = rows
-      .filter(
-        (r: WorkRow) =>
-          r.關聯者.some((u) => u.code === targetCode) &&
-          r.交辦 !== "完成" &&
-          r.交辦 !== "結案",
-      )
-      .map((r: WorkRow): AssignedRow => ({
-        ...r,
-        sourceRecordId,
-        assignerCode: assigner?.code || "",
-        assignerName: assigner?.name || "",
-      }));
-    result.push(...matching);
+  while (true) {
+    const resp = await kintone.api(
+      kintone.api.url("/k/v1/records.json", true),
+      "GET",
+      { app: APP_ID, query: `order by 工作日 desc limit 100 offset ${offset}` },
+    );
+
+    for (const record of resp.records) {
+      const sourceRecordId: string = record.$id.value;
+      const assigners: any[] = record.使用者?.value || [];
+      const rows = (record.工作表格?.value || []).map(parseRow);
+      const matching = rows
+        .filter(
+          (r: WorkRow) =>
+            r.關聯者.some((u) => u.code === targetCode) &&
+            r.交辦 !== "完成" &&
+            r.交辦 !== "結案",
+        )
+        .map((r: WorkRow): AssignedRow => ({
+          ...r,
+          sourceRecordId,
+          assignerCode: assigners.map((u) => u.code).join(','),
+          assignerName: assigners.map((u) => u.name).join('、'),
+        }));
+      result.push(...matching);
+    }
+
+    if (resp.records.length < 100) break;
+    offset += 100;
   }
 
   return result;

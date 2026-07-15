@@ -315,7 +315,20 @@ const App = () => {
       const sourceRowRef = activeData.type === 'assigned'
         ? `${activeData.row.sourceRecordId}|${activeData.row.subtableId}`
         : undefined;
-      const sourceRow = activeData.type === 'assigned' ? activeData.row as WorkRow : undefined;
+      const sourceRow: WorkRow | undefined = activeData.type === 'assigned' ? (() => {
+        const ar = activeData.row as AssignedRow;
+        const prefix = `【從指派人:${ar.assignerName}派來的任務】`;
+        return {
+          ...ar,
+          內容: ar.內容 ? `${prefix}\n${ar.內容}` : prefix,
+          交辦: '',
+          完成: '',
+          交辦日: '',
+          交辦到期日: '',
+          交辦完成日: '',
+          關聯者: [],
+        };
+      })() : undefined;
       if (activeData.type === 'source') {
         const srcId = (activeData.record as SourceRecord).id;
         const now = new Date().toISOString();
