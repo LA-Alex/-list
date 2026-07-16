@@ -46,7 +46,7 @@ const AssignedPanel = ({ rows, onComplete }: Props) => {
   return (
     <div className="assigned-panel">
       <div className="assigned-panel__header">
-        <span>交辦任務</span>
+        <span>轉自交辦任務</span>
         <div className="panel-filter-group">
           {greenCount > 0 && (
             <button className={`panel-filter-btn green ${filter === 'green' ? 'active' : ''}`} onClick={() => toggle('green')}>{greenCount}</button>

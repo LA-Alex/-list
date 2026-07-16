@@ -107,7 +107,7 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
       <div className="work-card__header" {...(completed ? {} : { ...attributes, ...listeners })}>
         <span className="work-card__label">
           {row.來源標籤 || '（未命名）'}
-          {row.來源列ID && <span className="work-card__source-id">{row.來源列ID}</span>}
+          {row.來源列ID && <span className="work-card__source-id">轉自交辦任務</span>}
         </span>
         <div className="work-card__actions" onPointerDown={e => e.stopPropagation()}>
           {!completed && onSave && (
