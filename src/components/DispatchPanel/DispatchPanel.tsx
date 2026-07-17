@@ -17,8 +17,10 @@ type Props = {
   onConfirm: (task: DispatchedTask) => void;
 };
 
+const WORK_DAY_APP_ID = 1525;
+
 const openRecord = (recordId: string) => {
-  const url = `${window.location.protocol}//${window.location.host}${window.location.pathname}show#record=${recordId}`;
+  const url = `${window.location.origin}/k/${WORK_DAY_APP_ID}/show#record=${recordId}`;
   window.open(url, '_blank');
 };
 
@@ -72,12 +74,13 @@ const DispatchPanel = ({ tasks, onConfirm }: Props) => {
         {visibleTasks.length === 0 ? (
           <div className="dispatch-panel__empty">{filter === 'all' ? '無指派中任務' : '此分類無資料'}</div>
         ) : (
-          visibleTasks.map((task) => (
+          visibleTasks.map((task, idx) => (
             <div
               key={task.subtableId}
               className={`dispatch-card ${task.交辦 === '完成' ? 'reported' : ''}`}
             >
               <div className="dispatch-card__top">
+                <span className="dispatch-card__num">{idx + 1}.</span>
                 <span
                   className="dispatch-card__label dispatch-card__label--link"
                   onClick={() => openRecord(task.recordId)}
@@ -93,7 +96,11 @@ const DispatchPanel = ({ tasks, onConfirm }: Props) => {
                 <div className="dispatch-card__date">📋 {task.交辦MEMO}</div>
               )}
               {task.內容 && (
-                <div className="dispatch-card__date">{task.內容}</div>
+                <div className="dispatch-card__content">
+                  {task.內容.split('\n').map((line, i) => (
+                    <div key={i} className={line.trim() ? '' : 'dispatch-card__content-gap'}>{line || ' '}</div>
+                  ))}
+                </div>
               )}
               {task.交辦日 && (
                 <div className="dispatch-card__date">交辦日：{task.交辦日}</div>

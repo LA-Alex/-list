@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { WorkRow, DayType } from '../../types';
@@ -29,6 +29,8 @@ const renderWithLinks = (text: string): React.ReactNode[] =>
 
 const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
   const [showModal, setShowModal] = useState(false);
+  const localRef = useRef<HTMLDivElement | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ bottom: number; left: number } | null>(null);
   const [modalMode, setModalMode] = useState<'edit' | 'view'>('edit');
   const [form, setForm] = useState<WorkRow>({ ...row });
   const [allUsers, setAllUsers] = useState<{ code: string; name: string }[]>([]);
@@ -56,6 +58,22 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.4 : 1,
+  };
+
+  const mergedRef = useCallback((el: HTMLDivElement | null) => {
+    setNodeRef(el);
+    localRef.current = el;
+  }, [setNodeRef]);
+
+  const handleMouseEnter = () => {
+    if (isDragging || (!row.內容 && !row.交辦MEMO)) return;
+    if (!localRef.current) return;
+    const rect = localRef.current.getBoundingClientRect();
+    const tooltipWidth = 320;
+    let left = rect.left;
+    if (left + tooltipWidth > window.innerWidth) left = window.innerWidth - tooltipWidth - 8;
+    if (left < 8) left = 8;
+    setTooltipPos({ bottom: window.innerHeight - rect.top + 8, left });
   };
 
   const openModal = (mode: 'edit' | 'view') => {
@@ -102,7 +120,31 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={`work-card ${completed && row.交辦 !== '完成' ? 'reported' : ''} ${completed ? 'locked' : ''}`}>
+    <div
+      ref={mergedRef}
+      style={style}
+      className={`work-card ${completed && row.交辦 !== '完成' ? 'reported' : ''} ${completed ? 'locked' : ''}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={() => setTooltipPos(null)}
+    >
+      {tooltipPos && !isDragging && (row.內容 || row.交辦MEMO) && (
+        <div className="work-card__tooltip" style={{ bottom: tooltipPos.bottom, left: tooltipPos.left }}>
+          {row.內容 && (
+            <>
+              <div className="work-card__tooltip-header">內容</div>
+              {row.內容.split('\n').map((line, i) => (
+                <div key={i} className="work-card__tooltip-item">{line || ' '}</div>
+              ))}
+            </>
+          )}
+          {row.交辦MEMO && (
+            <>
+              <div className="work-card__tooltip-header" style={row.內容 ? { marginTop: '10px' } : undefined}>交辦MEMO</div>
+              <div className="work-card__tooltip-item">{row.交辦MEMO}</div>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="work-card__header" {...(completed ? {} : { ...attributes, ...listeners })}>
         <span className="work-card__label">

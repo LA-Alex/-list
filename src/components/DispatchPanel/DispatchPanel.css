@@ -93,6 +93,13 @@
   gap: 6px;
 }
 
+.dispatch-card__num {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fa8c16;
+  flex-shrink: 0;
+}
+
 .dispatch-card__day {
   font-size: 12px;
   background: #fff3e0;
@@ -136,6 +143,16 @@
   font-size: 14px;
   color: #111;
   font-weight: 500;
+}
+
+.dispatch-card__content {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.dispatch-card__content-gap {
+  height: 0.5em;
 }
 
 .dispatch-card__footer {

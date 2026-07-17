@@ -624,3 +624,35 @@
 .modal-content-link:hover {
   text-decoration: underline;
 }
+
+/* Hover tooltip */
+.work-card__tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: #fff;
+  border: 1px solid #c8d8f0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  min-width: 300px;
+  max-width: 650px;
+  max-height: 60vh;
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.work-card__tooltip-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: #4a90d9;
+  margin-bottom: 3px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #e8eef6;
+}
+
+.work-card__tooltip-item {
+  font-size: 13px;
+  color: #222;
+  line-height: 1.5;
+  word-break: break-word;
+}
