@@ -27,11 +27,12 @@ type Props = {
   onClockOut?: () => Promise<void>;
   workLocation?: string;
   onWorkLocationChange?: (location: string) => void;
+  labelCategoryMap?: Record<string, string>;
 };
 
 const DOW = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
 
-const DayColumn = ({ dayKey, date, rows, recordId, selectedSourceIds, scheduledTime, clockInTime, scheduledOutTime, clockOutTime, isToday, onAdd, onDelete, onSave, onCopy, onClockIn, onClockOut, workLocation, onWorkLocationChange }: Props) => {
+const DayColumn = ({ dayKey, date, rows, recordId, selectedSourceIds, scheduledTime, clockInTime, scheduledOutTime, clockOutTime, isToday, onAdd, onDelete, onSave, onCopy, onClockIn, onClockOut, workLocation, onWorkLocationChange, labelCategoryMap }: Props) => {
   const [isClocking, setIsClocking] = useState(false);
   const [isClockingOut, setIsClockingOut] = useState(false);
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
@@ -147,6 +148,7 @@ const DayColumn = ({ dayKey, date, rows, recordId, selectedSourceIds, scheduledT
               key={row.subtableId}
               row={row}
               dayKey={dayKey}
+              labelCategory={labelCategoryMap?.[row.來源標籤] || ''}
               onDelete={onDelete ? (id) => onDelete(dayKey, id) : undefined}
               onSave={onSave ? (updated) => onSave(dayKey, updated) : undefined}
               onCopy={onCopy ? () => onCopy(row) : undefined}

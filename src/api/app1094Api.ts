@@ -26,7 +26,7 @@ export const getSourceRecords = async (): Promise<SourceRecord[]> => {
     "GET",
     {
       app: APP_ID,
-      fields: ["$id", "標籤", "標籤類別", "更新時間"],
+      fields: ["$id", "標籤", "標籤類別", "更新時間", "最後取用時間"],
       query: 'PM_FLAG in ("列入") order by 更新時間 desc limit 500',
     },
   );
@@ -36,6 +36,6 @@ export const getSourceRecords = async (): Promise<SourceRecord[]> => {
     標籤: r.標籤?.value || "",
     標籤類別: r.標籤類別?.value || "",
     更新時間: r.更新時間?.value || "",
-    最後取用時間: "",
+    最後取用時間: r.最後取用時間?.value || "",
   }));
 };

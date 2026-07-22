@@ -100,6 +100,11 @@
   flex-shrink: 0;
 }
 
+.dispatch-card__done-date {
+  color: #389e0d;
+  font-weight: 600;
+}
+
 .dispatch-card__day {
   font-size: 12px;
   background: #fff3e0;

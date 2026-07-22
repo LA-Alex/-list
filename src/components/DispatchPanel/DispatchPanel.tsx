@@ -110,6 +110,9 @@ const DispatchPanel = ({ tasks, onConfirm }: Props) => {
                   到期：{task.交辦到期日}
                 </div>
               )}
+              {task.交辦完成日 && (
+                <div className="dispatch-card__date dispatch-card__done-date">✅ 完成日：{task.交辦完成日}</div>
+              )}
               <div className="dispatch-card__footer">
                 {task.交辦 === '完成' ? (
                   <>

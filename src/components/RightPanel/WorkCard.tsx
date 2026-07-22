@@ -13,6 +13,7 @@ import './WorkCard.css';
 type Props = {
   row: WorkRow;
   dayKey: DayType;
+  labelCategory?: string;
   onDelete?: (subtableId: string) => void;
   onSave?: (updatedRow: WorkRow) => void;
   onCopy?: () => void;
@@ -27,7 +28,7 @@ const renderWithLinks = (text: string): React.ReactNode[] =>
       : part
   );
 
-const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
+const WorkCard = ({ row, dayKey, labelCategory, onDelete, onSave, onCopy }: Props) => {
   const [showModal, setShowModal] = useState(false);
   const localRef = useRef<HTMLDivElement | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ bottom: number; left: number } | null>(null);
@@ -149,6 +150,7 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
       <div className="work-card__header" {...(completed ? {} : { ...attributes, ...listeners })}>
         <span className="work-card__label">
           {row.來源標籤 || '（未命名）'}
+          {labelCategory && <span className="work-card__label-category">{labelCategory}</span>}
           {row.來源列ID && <span className="work-card__source-id">轉自交辦任務</span>}
         </span>
         <div className="work-card__actions" onPointerDown={e => e.stopPropagation()}>
@@ -175,8 +177,6 @@ const WorkCard = ({ row, dayKey, onDelete, onSave, onCopy }: Props) => {
       <div className="work-card__preview">
         {row.時段 && <span className="work-card__tag">{row.時段}</span>}
         {row.產品大類 && <span className="work-card__tag">{row.產品大類}</span>}
-        {row.交辦MEMO && <span className="work-card__tag">交辦MEMO：{row.交辦MEMO}</span>}
-        {row.內容 && <span className="work-card__tag work-card__tag--content" title={row.內容}>內容：{row.內容.length > 30 ? row.內容.slice(0, 30) + '…' : row.內容}</span>}
         {row.工作性質?.length > 0 && <span className="work-card__tag">{row.工作性質.join('、')}</span>}
         {row.交辦 && <span className="work-card__tag">交辦：{row.交辦}</span>}
         {row.交辦日 && <span className="work-card__tag">交辦日：{row.交辦日}</span>}

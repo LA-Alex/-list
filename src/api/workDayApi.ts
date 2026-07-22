@@ -393,8 +393,9 @@ export const setRowComplete = async (
     { app: APP_ID, id: sourceRecordId },
   );
   const rows: WorkRow[] = (fresh.record.工作表格?.value || []).map(parseRow);
+  const today = new Date().toISOString().slice(0, 10);
   const updatedRows = rows.map((r) =>
-    r.subtableId === subtableId ? { ...r, 交辦: "完成" } : r,
+    r.subtableId === subtableId ? { ...r, 交辦: "完成", 交辦完成日: today } : r,
   );
   await kintone.api(kintone.api.url("/k/v1/record.json", true), "PUT", {
     app: APP_ID,
@@ -457,10 +458,39 @@ export const fetchActiveUsers = async (): Promise<{ code: string; name: string }
     .map((u: any) => ({ code: u.code, name: u.name }));
 };
 
-// 下班打卡
+// 地址判斷是否在公司（Nominatim 反向地理編碼結果比對）
+const COMPANY_ADDRESS_KEYS = ['內湖路一段', '312號', '內湖區'];
+const isCompanyAddress = (addr: string): boolean =>
+  COMPANY_ADDRESS_KEYS.every(k => addr.includes(k));
+
+// GPS + 反向地理編碼，回傳 display_name 或座標字串
+const getLocationAddress = async (): Promise<string> => {
+  const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      timeout: 12000,
+      enableHighAccuracy: true,
+    });
+  });
+  const { latitude, longitude } = position.coords;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    const resp = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+      { signal: ctrl.signal },
+    );
+    clearTimeout(timer);
+    const data = await resp.json();
+    return data.display_name || `${latitude},${longitude}`;
+  } catch {
+    return `${latitude},${longitude}`;
+  }
+};
+
+// 下班打卡：先存時間（避免頁面跑掉），再偵測位置
 export const clockOut = async (
   record: WorkDayRecord,
-): Promise<{ time: string }> => {
+): Promise<{ time: string; isCompany: boolean }> => {
   const now = dayjs().format("HH:mm");
 
   await kintone.api(kintone.api.url("/k/v1/record.json", true), "PUT", {
@@ -471,48 +501,22 @@ export const clockOut = async (
     },
   });
 
-  return { time: now };
-};
-
-// 上班打卡
-const COMPANY_IP = "61.219.118.205";
-
-const detectCompanyNetwork = async (): Promise<boolean> => {
   try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 3000);
-    const resp = await fetch("https://api.ipify.org?format=json", { signal: ctrl.signal });
-    clearTimeout(timer);
-    const data = await resp.json();
-    return data.ip === COMPANY_IP;
+    const location = await getLocationAddress();
+    return { time: now, isCompany: isCompanyAddress(location) };
   } catch {
-    return false;
+    return { time: now, isCompany: false };
   }
 };
 
+// 上班打卡：GPS 反向地理編碼，用地址判斷是否在公司
 export const clockIn = async (
   record: WorkDayRecord,
 ): Promise<{ time: string; location: string; isCompany: boolean }> => {
   const now = dayjs().format("HH:mm");
 
-  // 並行：偵測公司 IP + 抓 GPS
-  const [isCompany, position] = await Promise.all([
-    detectCompanyNetwork(),
-    new Promise<GeolocationPosition>((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        timeout: 10000,
-        enableHighAccuracy: true,
-      });
-    }),
-  ]);
-
-  const { latitude, longitude } = position.coords;
-
-  const geoResp = await fetch(
-    `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
-  );
-  const geoData = await geoResp.json();
-  const location = geoData.display_name || `${latitude},${longitude}`;
+  const location = await getLocationAddress();
+  const isCompany = isCompanyAddress(location);
 
   await kintone.api(kintone.api.url("/k/v1/record.json", true), "PUT", {
     app: APP_ID,

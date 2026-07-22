@@ -137,8 +137,12 @@ const App = () => {
   const handleClockOut = async () => {
     if (!workDays?.[todayDate]) return;
     try {
-      const { time } = await clockOut(workDays[todayDate]);
+      const { time, isCompany } = await clockOut(workDays[todayDate]);
       setClockOutTime(time);
+      if (isCompany && !workLocation) {
+        setWorkLocation('公司');
+        await updateWorkLocation(workDays[todayDate].id!, '公司');
+      }
     } catch (e) {
       console.error(e);
       alert('下班打卡失敗！');
@@ -167,8 +171,14 @@ const App = () => {
   const handleCompleteAssigned = async (row: AssignedRow) => {
     try {
       await setRowComplete(row.sourceRecordId, row.subtableId);
-      const freshDays = await fetchWorkDayRecords(getWeekDates(weekOffset));
+      const targetCode = viewUsers[viewUserIdx]?.code;
+      const isSelf = targetCode === loginUser.code;
+      const [freshDays, freshDispatched] = await Promise.all([
+        fetchWorkDayRecords(getWeekDates(weekOffset), isSelf ? undefined : targetCode),
+        fetchDispatchedTasks(isSelf ? undefined : targetCode),
+      ]);
       setWorkDays(freshDays);
+      setDispatchedTasks(freshDispatched);
       setAssignedRows(prev =>
         prev.map(r => r.subtableId === row.subtableId ? { ...r, 交辦: '完成' } : r)
       );
@@ -396,6 +406,8 @@ const App = () => {
     }
   };
 
+  const labelCategoryMap = Object.fromEntries(sourceRecords.map(r => [r.標籤, r.標籤類別]));
+
   if (loading) return <div className="app-loading">載入中...</div>;
 
   return (
@@ -463,6 +475,7 @@ const App = () => {
               onClockOut={isViewingSelf && date === todayDate ? handleClockOut : undefined}
               workLocation={isViewingSelf && date === todayDate ? workLocation : undefined}
               onWorkLocationChange={isViewingSelf && date === todayDate ? handleWorkLocationChange : undefined}
+              labelCategoryMap={labelCategoryMap}
             />
           ))}
         </div>

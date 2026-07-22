@@ -36,3 +36,9 @@
   color: #888;
   margin-top: 4px;
 }
+
+.source-card__last-used {
+  font-size: 10px;
+  color: #aaa;
+  margin-top: 3px;
+}

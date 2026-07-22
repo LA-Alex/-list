@@ -29,6 +29,11 @@ const SourceCard = ({ record, isSelected, onToggleSelect }: Props) => {
     >
       <div className="source-card__label">{record.標籤}</div>
       <div className="source-card__category">{record.標籤類別}</div>
+      {record.最後取用時間 && (
+        <div className="source-card__last-used">
+          {new Date(record.最後取用時間).toLocaleString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}
+        </div>
+      )}
     </div>
   );
 };
