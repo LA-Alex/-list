@@ -1,0 +1,746 @@
+.work-card {
+  background: #fff;
+  border: 1px solid #d0d7e0;
+  border-left: 4px solid #4a90d9;
+}
+
+.work-card.reported {
+  border-left-color: #52c41a;
+  background: #f6ffed;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.work-card__header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  cursor: grab;
+  user-select: none;
+}
+
+.work-card__label {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.work-card__record-no {
+  font-size: 16px;
+  font-weight: 400;
+  color: #111;
+  white-space: nowrap;
+}
+
+.work-card__record-no.dimmed {
+  opacity: 0.4;
+}
+
+.work-card__source-id {
+  font-size: 12px;
+  font-weight: 400;
+  color: #7a5c00;
+  background: #ffe066;
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+
+.work-card__label-category {
+  font-size: 11px;
+  font-weight: 400;
+  color: #1677ff;
+  background: #e8f0fe;
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+
+.work-card__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.work-card__btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.work-card__btn:hover {
+  opacity: 1;
+  background: #f0f0f0;
+}
+
+.work-card__btn--delete:hover {
+  background: #ffe5e5;
+}
+
+.work-card__btn--done:hover {
+  background: #e6f7e6;
+}
+
+.work-card__btn--partial {
+  font-size: 15px;
+  color: #d46b08;
+  font-weight: 700;
+}
+
+.work-card__btn--partial:hover {
+  background: #fff7e6;
+}
+
+.work-card__btn-gap {
+  display: inline-block;
+  width: 12px;
+}
+
+.work-card__reported-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: #d9f7be;
+  font-size: 12px;
+  font-weight: 600;
+  color: #389e0d;
+}
+
+.work-card__confirm-btn {
+  background: #52c41a;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.work-card__confirm-btn:hover {
+  background: #3a9c0f;
+}
+
+.work-card__preview {
+  padding: 6px 12px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  gap: 6px;
+  align-items: center;
+}
+
+.work-card__bottom-row {
+  padding: 0 12px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.work-card__tag {
+  background: #eef3fb;
+  color: #4a90d9;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.work-card__form {
+  padding: 12px;
+  border-top: 1px solid #eee;
+  background: #fafbfc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.work-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.work-card__field label {
+  font-size: 13px;
+  color: #888;
+  font-weight: 600;
+}
+
+.work-card__field select,
+.work-card__field input,
+.work-card__field textarea {
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.work-card__field select:focus,
+.work-card__field input:focus,
+.work-card__field textarea:focus {
+  border-color: #4a90d9;
+}
+
+.work-card__checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.work-card__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.work-card__assignee-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.work-card__assignee {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #e8f0fe;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 13px;
+  color: #3367d6;
+}
+
+.work-card__assignee-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: #888;
+  padding: 0;
+  line-height: 1;
+}
+
+.work-card__assignee-remove:hover {
+  color: #e53935;
+}
+
+.work-card__user-search {
+  margin-top: 6px;
+}
+
+.work-card__user-dropdown {
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  background: #fff;
+  max-height: 160px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.work-card__user-option {
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #333;
+}
+
+.work-card__user-option:hover {
+  background: #f0f5ff;
+}
+
+.work-card__user-code {
+  color: #999;
+  font-size: 12px;
+}
+
+.work-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.work-card__cancel {
+  background: #f0f0f0;
+  color: #555;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.work-card__cancel:hover {
+  background: #e0e0e0;
+}
+
+.work-card__save {
+  background: #4a90d9;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.work-card__save:hover {
+  background: #357abd;
+}
+
+.work-card__tag--done {
+  background: #d9f7be;
+  color: #389e0d;
+}
+
+.work-card__tag--partial {
+  background: #fff7e6;
+  color: #d46b08;
+}
+
+.work-card__tag--content {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+
+.work-card__tag--link {
+  color: #1677ff;
+  background: #e8f0fe;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.work-card__tag--link:hover {
+  background: #bdd5ff;
+  text-decoration: underline;
+}
+
+.work-card.locked {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.work-card.important {
+  border-left-color: #e53935;
+}
+
+.work-card__btn--important {
+  font-size: 15px;
+}
+
+.work-card.locked .work-card__header {
+  cursor: default;
+}
+
+.work-card__copy-wrap {
+  position: relative;
+}
+
+.work-card__copy-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #fff;
+  border: 1px solid #d0d7e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  z-index: 100;
+  min-width: 160px;
+  overflow: hidden;
+}
+
+.work-card__copy-option {
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.work-card__copy-option:hover {
+  background: #f0f5ff;
+  color: #4a90d9;
+}
+
+/* Edit Modal */
+.edit-modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.edit-modal-box {
+  background: #fff;
+  border-radius: 10px;
+  width: 500px;
+  max-height: 85vh;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.edit-modal-scroll {
+  overflow-y: auto;
+  flex: 1;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-modal-scroll .modal-field label {
+  font-size: 12px;
+  color: #888;
+  font-weight: 600;
+}
+
+.modal-field-row {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-field-row .modal-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-field-row .modal-field--narrow {
+  flex: 0 0 84px;
+}
+
+.modal-field--narrow .modal-checkbox-item {
+  height: 34px;
+  align-items: center;
+}
+
+.edit-modal-scroll .modal-field select,
+.edit-modal-scroll .modal-field input,
+.edit-modal-scroll .modal-field textarea {
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-modal-scroll .modal-field select:focus,
+.edit-modal-scroll .modal-field input:focus,
+.edit-modal-scroll .modal-field textarea:focus {
+  border-color: #4a90d9;
+}
+
+.edit-modal-box .modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.edit-modal-box .modal-cancel,
+.edit-modal-box .modal-confirm {
+  padding: 8px 28px;
+}
+
+/* 工作性質 checkbox group */
+.modal-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 4px;
+}
+
+.modal-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.modal-checkbox-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: #1677ff;
+}
+
+/* App 1477 / 1093 reference list */
+.modal-ref-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+  border: 1px solid #e8edf3;
+  border-radius: 6px;
+  padding: 4px 0;
+}
+
+.modal-ref-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.modal-ref-item:hover {
+  background: #f5f8ff;
+}
+
+.modal-ref-item.selected {
+  background: #e8f0fe;
+}
+
+.modal-ref-item input[type="radio"] {
+  flex-shrink: 0;
+  accent-color: #1677ff;
+}
+
+.modal-ref-appid,
+.modal-ref-issueno {
+  font-weight: 700;
+  color: #1677ff;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.modal-ref-name,
+.modal-ref-title {
+  color: #333;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-ref-link {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: #1677ff;
+  text-decoration: none;
+  background: #e8f0fe;
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+
+.modal-ref-link:hover {
+  background: #bdd5ff;
+  text-decoration: underline;
+}
+
+/* copy icon size fix */
+.work-card__btn--copy {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* 工作性質 / 關聯人 add-select */
+.modal-field-select-add {
+  margin-top: 6px;
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  color: #555;
+  cursor: pointer;
+}
+
+.modal-field-select-add:focus {
+  border-color: #4a90d9;
+}
+
+/* App 1477/1093 loading/empty */
+.modal-ref-status {
+  font-size: 12px;
+  color: #aaa;
+  padding: 6px 2px;
+}
+
+/* 選了 App 1477 後顯示的連結 */
+.modal-ref-link-inline {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #1677ff;
+  word-break: break-all;
+  text-decoration: none;
+}
+
+.modal-ref-link-inline:hover {
+  text-decoration: underline;
+}
+
+/* 搜尋選取後的連結列表 */
+.modal-linked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.modal-linked-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0f5ff;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.modal-linked-item a {
+  flex: 1;
+  color: #1677ff;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.modal-linked-item a:hover {
+  text-decoration: underline;
+}
+
+/* 內容欄位 view 模式 */
+.modal-content-view {
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 13px;
+  background: #fafbfc;
+  color: #333;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.modal-content-link {
+  color: #1677ff;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.modal-content-link:hover {
+  text-decoration: underline;
+}
+
+/* 相關應用程式／ToDo Z000 Issues List 搜尋 + 標籤篩選 */
+.modal-ref-search-wrap {
+  position: relative;
+}
+
+.modal-ref-search-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.modal-ref-search-row .modal-ref-search-input {
+  flex: 1;
+  margin-top: 0;
+}
+
+.modal-ref-tag-select {
+  flex-shrink: 0;
+  max-width: 110px;
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  padding: 7px 6px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+}
+
+.modal-ref-tag-select:focus {
+  border-color: #4a90d9;
+}
+
+/* 讓搜尋結果浮層蓋在其他欄位上面，而不是把版面往下推 */
+.work-card__user-dropdown--floating {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  z-index: 20;
+  margin-top: 2px;
+  box-sizing: border-box;
+}
+
+/* Hover tooltip */
+.work-card__tooltip {
+  position: fixed;
+  z-index: 900;
+  background: #fffbe0;
+  border: 1px solid #c8d8f0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  width: 320px;
+  box-sizing: border-box;
+  max-height: 60vh;
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.work-card__tooltip-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: #4a90d9;
+  margin-bottom: 3px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #e8eef6;
+}
+
+.work-card__tooltip-item {
+  font-size: 13px;
+  color: #222;
+  line-height: 1.5;
+  word-break: break-word;
+}
