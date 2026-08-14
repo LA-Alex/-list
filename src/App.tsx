@@ -103,18 +103,6 @@ const App = () => {
   }, [weekOffset, viewUserIdx]);
 
   const handleToggleSelect = (id: string) => {
-    if (!selectedSourceIds.includes(id)) {
-      const now = new Date().toISOString();
-      updateSourceLastUsed(id)
-        .then(() => {
-          setSourceRecords(prev => {
-            const rec = prev.find(r => r.id === id);
-            if (!rec) return prev;
-            return [{ ...rec, 最後取用時間: now }, ...prev.filter(r => r.id !== id)];
-          });
-        })
-        .catch(() => {});
-    }
     setSelectedSourceIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
