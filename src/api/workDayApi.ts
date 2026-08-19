@@ -419,15 +419,22 @@ export const updateRowByRecordId = async (
 export const fetchAssignedRows = async (userCode?: string): Promise<AssignedRow[]> => {
   const user = kintone.getLoginUser();
   const targetCode = userCode ?? user.code;
+  await ensureFieldCodeMap();
 
   const result: AssignedRow[] = [];
   let offset = 0;
+  const PAGE_SIZE = 500; // kintone records.json 單次上限，減少來回次數
 
   while (true) {
     const resp = await kintone.api(
       kintone.api.url("/k/v1/records.json", true),
       "GET",
-      { app: APP_ID, query: `order by 工作日 desc limit 100 offset ${offset}` },
+      {
+        app: APP_ID,
+        // 先在伺服器端篩掉「關聯者不含此使用者」的記錄，避免整個 app 撈回來再用前端過濾
+        query: `${fc('關聯者')} in ("${targetCode}") order by 工作日 desc limit ${PAGE_SIZE} offset ${offset}`,
+        fields: ['$id', '記錄號碼', '使用者', '工作表格'],
+      },
     );
 
     for (const record of resp.records) {
@@ -451,8 +458,8 @@ export const fetchAssignedRows = async (userCode?: string): Promise<AssignedRow[
       result.push(...matching);
     }
 
-    if (resp.records.length < 100) break;
-    offset += 100;
+    if (resp.records.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
   }
 
   return result;

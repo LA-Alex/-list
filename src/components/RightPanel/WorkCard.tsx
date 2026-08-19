@@ -123,7 +123,7 @@ const WorkCard = ({ row, dayKey, labelCategory, allTags, onDelete, onSave, onCop
           {row.來源列ID && <span className="work-card__source-id">轉自交辦任務</span>}
           {row.來源列ID && row.記錄號碼 && row.交辦 !== '結案' && (
             <span className={`work-card__record-no ${(completed || row.交辦 === '完成') ? 'dimmed' : ''}`}>
-              記錄號碼：{row.記錄號碼}
+              {row.記錄號碼}
             </span>
           )}
         </span>

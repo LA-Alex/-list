@@ -41,7 +41,7 @@ const AssignedCard = ({ row, onComplete }: Props) => {
         <span className="assigned-card__label">{row.來源標籤}</span>
         {row.記錄號碼 && row.交辦 !== '結案' && (
           <span className={`assigned-card__record-no ${(isDone || row.完成 === '完成') ? 'dimmed' : ''}`}>
-            記錄號碼：{row.記錄號碼}
+            {row.記錄號碼}
           </span>
         )}
         {!isDone && (

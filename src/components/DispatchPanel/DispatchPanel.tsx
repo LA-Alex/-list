@@ -81,7 +81,7 @@ const DispatchPanel = ({ tasks, allTags, onConfirm, onSave }: Props) => {
                 <span className="dispatch-card__label">{task.來源標籤}</span>
                 {task.記錄號碼 && task.交辦 !== '結案' && (
                   <span className={`dispatch-card__record-no ${(task.交辦 === '完成' || task.完成 === '完成') ? 'dimmed' : ''}`}>
-                    記錄號碼：{task.記錄號碼}
+                    {task.記錄號碼}
                   </span>
                 )}
                 <button

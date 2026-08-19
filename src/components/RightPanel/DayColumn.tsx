@@ -78,7 +78,7 @@ const DayColumn = ({ dayKey, date, rows, recordId, recordNumber, selectedSourceI
           {date}
         </span>
         {isToday && <span className="day-column__today-badge">今</span>}
-        {recordNumber && <span className="day-column__record-no">記錄號碼：{recordNumber}</span>}
+        {recordNumber && <span className="day-column__record-no">{recordNumber}</span>}
 
         {scheduledTime && (
           <span className="day-column__clocked">
