@@ -1,13 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import DOMPurify from 'dompurify';
 import { WorkRow } from '../../types';
 import { fetchKintoneUsers } from '../../api/workDayApi';
 import { fetchApp1477ByLabel, App1477Record } from '../../api/app1477Api';
 import { fetchApp1093ByLabel, App1093Record } from '../../api/app1093Api';
+import { fetchApp1617Records, App1617Record } from '../../api/app1617Api';
 import { fetchAppFieldOptions } from '../../api/fieldOptionsApi';
+import { toSafeContentHtml } from '../../utils/richContent';
 import '../RightPanel/WorkCard.css';
 
 const WORK_DAY_APP_ID = 1525;
 const ALL_TAG = '全部';
+
+// 沿用 kintone Rich Editor 原生的預設色盤，紅/藍/黑（標記 V 的常用色）排前面
+const TEXT_COLORS = ['#ff0000', '#0000ff', '#000000', '#ff9900', '#00ff00'];
+const BG_COLORS = ['rgb(255,0,0)', 'rgb(255,255,0)', 'rgb(0,255,0)', 'rgb(0,255,255)'];
 
 type Props = {
   row: WorkRow;
@@ -32,15 +39,24 @@ const TaskEditModal = ({ row, title, mode, allTags, onSave, onClose }: Props) =>
   const [userSearch, setUserSearch] = useState('');
   const [app1477Records, setApp1477Records] = useState<App1477Record[]>([]);
   const [app1093Records, setApp1093Records] = useState<App1093Record[]>([]);
+  const [app1617Records, setApp1617Records] = useState<App1617Record[]>([]);
   const [loading1477, setLoading1477] = useState(false);
   const [loading1093, setLoading1093] = useState(false);
+  const [loading1617, setLoading1617] = useState(false);
   const [search1477, setSearch1477] = useState('');
   const [search1093, setSearch1093] = useState('');
+  const [search1617, setSearch1617] = useState('');
   const [focused1477, setFocused1477] = useState(false);
   const [focused1093, setFocused1093] = useState(false);
+  const [focused1617, setFocused1617] = useState(false);
   const [fieldOptions, setFieldOptions] = useState<Record<string, string[]>>({});
   const [selectedTag1477, setSelectedTag1477] = useState(row.來源標籤 || ALL_TAG);
   const [selectedTag1093, setSelectedTag1093] = useState(row.來源標籤 || ALL_TAG);
+  const [selectedProject1617, setSelectedProject1617] = useState(ALL_TAG);
+  const contentEditorRef = useRef<HTMLDivElement>(null);
+
+  // PMO 記錄沒有標籤欄位，改用資料裡實際出現過的專案名稱當篩選選項
+  const project1617Options = Array.from(new Set(app1617Records.map(r => r.專案名稱).filter(Boolean))).sort();
 
   const loadApp1477 = (tag: string) => {
     setLoading1477(true);
@@ -58,13 +74,56 @@ const TaskEditModal = ({ row, title, mode, allTags, onSave, onClose }: Props) =>
       .finally(() => setLoading1093(false));
   };
 
+  const loadApp1617 = () => {
+    setLoading1617(true);
+    fetchApp1617Records()
+      .then(setApp1617Records)
+      .catch(e => console.error('App1617 fetch error:', e))
+      .finally(() => setLoading1617(false));
+  };
+
   useEffect(() => {
     fetchKintoneUsers().then(setAllUsers).catch(() => {});
     fetchAppFieldOptions(WORK_DAY_APP_ID).then(setFieldOptions).catch(() => {});
     loadApp1477(selectedTag1477);
     loadApp1093(selectedTag1093);
+    loadApp1617();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (contentEditorRef.current) {
+      const html = toSafeContentHtml(row.內容 || '');
+      contentEditorRef.current.innerHTML = html;
+      setForm(f => ({ ...f, 內容: html }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const savedContentRangeRef = useRef<Range | null>(null);
+
+  // 記住編輯區裡目前的選取範圍：套用字級/顏色的 select、color input 會讓 focus 離開編輯區，
+  // 沒存起來的話再點回來時瀏覽器的選取狀態會不見，套用的格式會跑掉位置。
+  const saveContentSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && contentEditorRef.current?.contains(sel.anchorNode)) {
+      savedContentRangeRef.current = sel.getRangeAt(0).cloneRange();
+    }
+  };
+
+  const execContentCommand = (cmd: string, value?: string) => {
+    contentEditorRef.current?.focus();
+    const sel = window.getSelection();
+    if (sel && savedContentRangeRef.current) {
+      sel.removeAllRanges();
+      sel.addRange(savedContentRangeRef.current);
+    }
+    document.execCommand('styleWithCSS', false, 'true');
+    document.execCommand(cmd, false, value);
+    if (contentEditorRef.current) {
+      setForm(f => ({ ...f, 內容: contentEditorRef.current!.innerHTML }));
+    }
+  };
 
   const add工作性質 = (opt: string) => {
     if (opt && !form.工作性質.includes(opt)) {
@@ -77,7 +136,7 @@ const TaskEditModal = ({ row, title, mode, allTags, onSave, onClose }: Props) =>
   };
 
   const handleSave = () => {
-    onSave({ ...row, ...form });
+    onSave({ ...row, ...form, 內容: DOMPurify.sanitize(form.內容) });
   };
 
   return (
@@ -227,6 +286,57 @@ const TaskEditModal = ({ row, title, mode, allTags, onSave, onClose }: Props) =>
             </div>
           )}
 
+          {!ro && (
+            <div className="modal-field">
+              <label>PMO測試規格、結果報告</label>
+              {loading1617 ? (
+                <div className="modal-ref-status">載入中...</div>
+              ) : (
+                <div className="modal-ref-search-wrap">
+                  <div className="modal-ref-search-row">
+                    <input
+                      type="text"
+                      placeholder="搜尋專案名稱、測試No或測試項目..."
+                      value={search1617}
+                      onChange={e => setSearch1617(e.target.value)}
+                      onFocus={() => setFocused1617(true)}
+                      onBlur={() => setTimeout(() => setFocused1617(false), 150)}
+                      className="work-card__user-search modal-ref-search-input"
+                    />
+                    <select
+                      className="modal-ref-tag-select"
+                      value={selectedProject1617}
+                      onChange={e => setSelectedProject1617(e.target.value)}
+                      title="篩選專案名稱"
+                    >
+                      <option value={ALL_TAG}>{ALL_TAG}</option>
+                      {project1617Options.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                  {focused1617 && (
+                    <div className="work-card__user-dropdown work-card__user-dropdown--floating" onMouseDown={e => e.preventDefault()}>
+                      {app1617Records
+                        .filter(r => selectedProject1617 === ALL_TAG || r.專案名稱 === selectedProject1617)
+                        .filter(r => !search1617 || r.專案名稱.includes(search1617) || r.測試No.includes(search1617) || r.測試項目.includes(search1617))
+                        .slice(0, 20).map(r => (
+                        <div key={r.id} className="work-card__user-option"
+                          onClick={() => {
+                            const url = `${window.location.origin}/k/1617/show#record=${r.id}`;
+                            const line = `[${r.測試No}] ${r.專案名稱} / ${r.測試項目 || '-'} / ${r.審查與稽核類型} / V&V:${r.VV驗證狀態 || '-'} / 結案:${r.結案日期 || '未結案'}: ${url}`;
+                            setForm(f => ({ ...f, 連結: f.連結 ? `${f.連結}\n${line}` : line }));
+                            setSearch1617('');
+                            setFocused1617(false);
+                          }}>
+                          [{r.測試No}] {r.專案名稱} / {r.測試項目 || '-'} / {r.審查與稽核類型} / V&V:{r.VV驗證狀態 || '-'} / 結案:{r.結案日期 || '未結案'}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="modal-field">
             <label>連結</label>
             {ro ? (
@@ -248,13 +358,68 @@ const TaskEditModal = ({ row, title, mode, allTags, onSave, onClose }: Props) =>
           <div className="modal-field">
             <label>內容</label>
             {ro ? (
-              <div className="modal-content-view">
-                {form.內容.split('\n').map((line, i) => (
-                  <div key={i} style={{ minHeight: '1.2em' }}>{line ? renderWithLinks(line) : ' '}</div>
-                ))}
-              </div>
+              <div
+                className="modal-content-view"
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(toSafeContentHtml(form.內容)) }}
+              />
             ) : (
-              <textarea value={form.內容} onChange={e => setForm(f => ({ ...f, 內容: e.target.value }))} rows={3} />
+              <>
+                <div className="modal-rich-toolbar">
+                  <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => execContentCommand('bold')}><b>B</b></button>
+                  <button type="button" onMouseDown={e => e.preventDefault()} onClick={() => execContentCommand('strikeThrough')}><s>刪除線</s></button>
+                  <select
+                    className="modal-rich-toolbar-select"
+                    defaultValue=""
+                    onMouseDown={saveContentSelection}
+                    onChange={e => { if (e.target.value) execContentCommand('fontSize', e.target.value); e.target.value = ''; }}
+                    title="文字大小"
+                  >
+                    <option value="">字級</option>
+                    <option value="2">小</option>
+                    <option value="3">正常</option>
+                    <option value="4">中</option>
+                    <option value="5">大</option>
+                    <option value="6">特大</option>
+                    <option value="7">巨大</option>
+                  </select>
+                  <div className="modal-rich-toolbar-swatches">
+                    <span className="modal-rich-toolbar-swatch-label">文字色</span>
+                    {TEXT_COLORS.map(c => (
+                      <button
+                        key={c}
+                        type="button"
+                        className="modal-rich-toolbar-swatch"
+                        style={{ background: c }}
+                        onMouseDown={e => e.preventDefault()}
+                        onClick={() => execContentCommand('foreColor', c)}
+                        title={c}
+                      />
+                    ))}
+                  </div>
+                  <div className="modal-rich-toolbar-swatches">
+                    <span className="modal-rich-toolbar-swatch-label">背景色</span>
+                    {BG_COLORS.map(c => (
+                      <button
+                        key={c}
+                        type="button"
+                        className="modal-rich-toolbar-swatch"
+                        style={{ background: c }}
+                        onMouseDown={e => e.preventDefault()}
+                        onClick={() => execContentCommand('backColor', c)}
+                        title={c}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div
+                  ref={contentEditorRef}
+                  className="modal-rich-editor"
+                  contentEditable
+                  onInput={() => setForm(f => ({ ...f, 內容: contentEditorRef.current?.innerHTML || '' }))}
+                  onMouseUp={saveContentSelection}
+                  onKeyUp={saveContentSelection}
+                />
+              </>
             )}
           </div>
 

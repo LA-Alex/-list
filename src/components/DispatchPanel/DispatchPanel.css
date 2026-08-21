@@ -172,10 +172,7 @@
   font-size: 13px;
   color: #333;
   line-height: 1.6;
-}
-
-.dispatch-card__content-gap {
-  height: 0.5em;
+  word-break: break-word;
 }
 
 .dispatch-card__footer {

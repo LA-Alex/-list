@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DispatchedTask, WorkRow } from '../../types';
 import MultiSelectDropdown from '../common/MultiSelectDropdown';
 import TaskEditModal from '../common/TaskEditModal';
+import { ContentHtml } from '../../utils/richContent';
 import './DispatchPanel.css';
 
 type DeadlineStatus = 'green' | 'orange' | 'red';
@@ -97,11 +98,7 @@ const DispatchPanel = ({ tasks, allTags, onConfirm, onSave }: Props) => {
                 <div className="dispatch-card__date">📋 {task.交辦MEMO}</div>
               )}
               {task.內容 && (
-                <div className="dispatch-card__content">
-                  {task.內容.split('\n').map((line, i) => (
-                    <div key={i} className={line.trim() ? '' : 'dispatch-card__content-gap'}>{line || ' '}</div>
-                  ))}
-                </div>
+                <ContentHtml text={task.內容} className="dispatch-card__content" maxLen={50} />
               )}
               {task.交辦日 && (
                 <div className="dispatch-card__date">交辦日：{task.交辦日}</div>

@@ -140,6 +140,14 @@
   align-items: center;
 }
 
+.work-card__content {
+  padding: 4px 12px 0;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
 .work-card__bottom-row {
   padding: 0 12px 10px;
   display: flex;
@@ -669,6 +677,89 @@
 
 .modal-content-link:hover {
   text-decoration: underline;
+}
+
+/* 內容欄位簡易格式化編輯器 */
+.modal-rich-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.modal-rich-toolbar button {
+  flex-shrink: 0;
+  white-space: nowrap;
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  background: #fff;
+  padding: 4px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.modal-rich-toolbar button:not(.modal-rich-toolbar-swatch):hover {
+  background: #f0f5ff;
+  border-color: #4a90d9;
+}
+
+.edit-modal-scroll .modal-field select.modal-rich-toolbar-select {
+  flex-shrink: 0;
+  width: auto;
+  min-width: 0;
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  padding: 4px 4px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.modal-rich-toolbar-swatches {
+  flex-shrink: 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.modal-rich-toolbar-swatch-label {
+  font-size: 12px;
+  color: #555;
+}
+
+.modal-rich-toolbar-swatch {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid #d0d7e0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-rich-toolbar-swatch:hover {
+  border-color: #4a90d9;
+  transform: scale(1.1);
+}
+
+.modal-rich-editor {
+  border: 1px solid #d0d7e0;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 13px;
+  height: 4.8em;
+  min-height: 2.4em;
+  line-height: 1.6;
+  word-break: break-all;
+  overflow-y: auto;
+  resize: vertical;
+}
+
+.modal-rich-editor:focus {
+  outline: none;
+  border-color: #4a90d9;
 }
 
 /* 相關應用程式／ToDo Z000 Issues List 搜尋 + 標籤篩選 */

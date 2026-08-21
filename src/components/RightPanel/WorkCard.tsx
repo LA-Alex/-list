@@ -4,6 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { WorkRow, DayType } from '../../types';
 import TaskEditModal from '../common/TaskEditModal';
 import Timeline from '../TimeLine';
+import { ContentHtml } from '../../utils/richContent';
 import './WorkCard.css';
 
 type Props = {
@@ -102,9 +103,7 @@ const WorkCard = ({ row, dayKey, labelCategory, allTags, onDelete, onSave, onCop
           {row.內容 && (
             <>
               <div className="work-card__tooltip-header">內容</div>
-              {row.內容.split('\n').map((line, i) => (
-                <div key={i} className="work-card__tooltip-item">{line || ' '}</div>
-              ))}
+              <ContentHtml text={row.內容} className="work-card__tooltip-item" />
             </>
           )}
           {row.交辦MEMO && (
@@ -154,6 +153,8 @@ const WorkCard = ({ row, dayKey, labelCategory, allTags, onDelete, onSave, onCop
           )}
         </div>
       </div>
+
+      {row.內容 && <ContentHtml text={row.內容} className="work-card__content" maxLen={50} />}
 
       <div className="work-card__preview">
         {row.產品大類 && <span className="work-card__tag">{row.產品大類}</span>}
