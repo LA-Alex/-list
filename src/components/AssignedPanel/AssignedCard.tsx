@@ -56,7 +56,7 @@ const AssignedCard = ({ row, onComplete }: Props) => {
         <div className="assigned-card__memo">📋 {row.交辦MEMO}</div>
       )}
       {row.內容 && (
-        <ContentHtml text={normalizeLiteralNewlines(row.內容)} className="assigned-card__memo" maxLen={50} />
+        <ContentHtml text={normalizeLiteralNewlines(row.內容)} className="assigned-card__memo" />
       )}
       <div className="assigned-card__footer">
         {row.交辦 && (

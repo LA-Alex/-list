@@ -27,7 +27,14 @@ const SourceCard = ({ record, isSelected, onToggleSelect }: Props) => {
       {...listeners}
       {...attributes}
     >
-      <div className="source-card__label">{record.標籤}</div>
+      <div
+        className="source-card__label clickable"
+        onPointerDown={e => e.stopPropagation()}
+        onClick={e => { e.stopPropagation(); window.open(`https://${window.location.hostname}/k/1094/show#record=${record.id}`, '_blank'); }}
+        title="到 1094 標籤資料"
+      >
+        {record.標籤}
+      </div>
       <div className="source-card__category">{record.標籤類別}</div>
       {record.WAR_MEMO && (
         <div className="source-card__war-memo">{record.WAR_MEMO}</div>

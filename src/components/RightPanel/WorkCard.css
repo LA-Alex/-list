@@ -32,6 +32,15 @@
   gap: 6px;
 }
 
+.work-card__label-text.clickable {
+  cursor: pointer;
+}
+
+.work-card__label-text.clickable:hover {
+  color: #1677ff;
+  text-decoration: underline;
+}
+
 .work-card__record-no {
   font-size: 16px;
   font-weight: 400;

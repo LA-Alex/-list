@@ -405,6 +405,7 @@ const App = () => {
   };
 
   const labelCategoryMap = Object.fromEntries(sourceRecords.map(r => [r.標籤, r.標籤類別]));
+  const labelIdMap = Object.fromEntries(sourceRecords.map(r => [r.標籤, r.id]));
   const allTags = Array.from(new Set(sourceRecords.map(r => r.標籤).filter(Boolean)));
 
   const toggleTaskFilter = (f: typeof taskFilter) => setTaskFilter(prev => prev === f ? 'all' : f);
@@ -496,6 +497,7 @@ const App = () => {
               workLocation={isViewingSelf && date === todayDate ? workLocation : undefined}
               onWorkLocationChange={isViewingSelf && date === todayDate ? handleWorkLocationChange : undefined}
               labelCategoryMap={labelCategoryMap}
+              labelIdMap={labelIdMap}
               allTags={allTags}
             />
           ))}

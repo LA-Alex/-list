@@ -31,6 +31,16 @@
   color: #1a1a2e;
 }
 
+.source-card__label.clickable {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.source-card__label.clickable:hover {
+  color: #1677ff;
+  text-decoration: underline;
+}
+
 .source-card__category {
   font-size: 11px;
   color: #888;

@@ -11,6 +11,7 @@ type Props = {
   row: WorkRow;
   dayKey: DayType;
   labelCategory?: string;
+  labelSourceId?: string;
   allTags: string[];
   onDelete?: (subtableId: string) => void;
   onSave?: (updatedRow: WorkRow) => void;
@@ -19,7 +20,7 @@ type Props = {
 
 const isCompleted = (row: WorkRow) => row.完成 === '完成';
 
-const WorkCard = ({ row, dayKey, labelCategory, allTags, onDelete, onSave, onCopy }: Props) => {
+const WorkCard = ({ row, dayKey, labelCategory, labelSourceId, allTags, onDelete, onSave, onCopy }: Props) => {
   const [showModal, setShowModal] = useState(false);
   const [timelineRecord, setTimelineRecord] = useState<Record<string, unknown> | null>(null);
   const localRef = useRef<HTMLDivElement | null>(null);
@@ -117,7 +118,18 @@ const WorkCard = ({ row, dayKey, labelCategory, allTags, onDelete, onSave, onCop
 
       <div className="work-card__header" {...(completed ? {} : { ...attributes, ...listeners })}>
         <span className="work-card__label">
-          {row.來源標籤 || '（未命名）'}
+          {labelSourceId ? (
+            <span
+              className="work-card__label-text clickable"
+              onPointerDown={e => e.stopPropagation()}
+              onClick={e => { e.stopPropagation(); window.open(`https://${window.location.hostname}/k/1094/show#record=${labelSourceId}`, '_blank'); }}
+              title="到 1094 標籤資料"
+            >
+              {row.來源標籤 || '（未命名）'}
+            </span>
+          ) : (
+            row.來源標籤 || '（未命名）'
+          )}
           {labelCategory && <span className="work-card__label-category">{labelCategory}</span>}
           {row.來源列ID && <span className="work-card__source-id">轉自交辦任務</span>}
           {row.來源列ID && row.記錄號碼 && row.交辦 !== '結案' && (
