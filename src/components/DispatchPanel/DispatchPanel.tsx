@@ -98,7 +98,7 @@ const DispatchPanel = ({ tasks, allTags, onConfirm, onSave }: Props) => {
                 <div className="dispatch-card__date">📋 {task.交辦MEMO}</div>
               )}
               {task.內容 && (
-                <ContentHtml text={task.內容} className="dispatch-card__content" maxLen={50} />
+                <ContentHtml text={task.內容} className="dispatch-card__content" />
               )}
               {task.交辦日 && (
                 <div className="dispatch-card__date">交辦日：{task.交辦日}</div>
