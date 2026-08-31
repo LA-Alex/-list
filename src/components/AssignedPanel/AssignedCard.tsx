@@ -1,15 +1,13 @@
 import { useDraggable } from '@dnd-kit/core';
 import { AssignedRow } from '../../types';
 import { ContentHtml } from '../../utils/richContent';
+import { LinkList } from '../../utils/linkList';
 import './AssignedPanel.css';
 
 type Props = {
   row: AssignedRow;
   onComplete: (row: AssignedRow) => void;
 };
-
-// 有些資料存的是字面上的「\n」兩個字元而不是真正換行，兩種都要處理
-const normalizeLiteralNewlines = (text: string) => text.replace(/\\n/g, '\n');
 
 const AssignedCard = ({ row, onComplete }: Props) => {
   const isDone = row.交辦 === '完成';
@@ -56,7 +54,12 @@ const AssignedCard = ({ row, onComplete }: Props) => {
         <div className="assigned-card__memo">📋 {row.交辦MEMO}</div>
       )}
       {row.內容 && (
-        <ContentHtml text={normalizeLiteralNewlines(row.內容)} className="assigned-card__memo" />
+        <ContentHtml text={row.內容} className="assigned-card__memo" />
+      )}
+      {row.連結 && (
+        <div className="assigned-card__links">
+          <LinkList text={row.連結} tagClassName="assigned-card__link" />
+        </div>
       )}
       <div className="assigned-card__footer">
         {row.交辦 && (

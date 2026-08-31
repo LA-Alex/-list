@@ -5,6 +5,7 @@ import { WorkRow, DayType } from '../../types';
 import TaskEditModal from '../common/TaskEditModal';
 import Timeline from '../TimeLine';
 import { ContentHtml } from '../../utils/richContent';
+import { LinkList } from '../../utils/linkList';
 import './WorkCard.css';
 
 type Props = {
@@ -177,18 +178,7 @@ const WorkCard = ({ row, dayKey, labelCategory, labelSourceId, allTags, onDelete
         {row.完成 === '部分' && <span className="work-card__tag work-card__tag--partial">部分完成</span>}
         {row.工作時數 && <span className="work-card__tag">工時：{row.工作時數}</span>}
         {row.關聯者?.length > 0 && <span className="work-card__tag">👤 {row.關聯者.map(u => u.name).join('、')}</span>}
-        {row.連結 && row.連結.split('\n').filter(l => l.trim()).map((line, i) => {
-          const m = line.match(/https?:\/\/[^\s]+/);
-          const href = m ? m[0] : null;
-          const label = line.replace(/https?:\/\/[^\s]+/, '').replace(/:\s*$/, '').trim();
-          return href ? (
-            <a key={i} href={href} target="_blank" rel="noopener noreferrer"
-              className="work-card__tag work-card__tag--link"
-              onClick={e => handleLinkClick(e, href)}>
-              🔗 {label || href.replace(/^https?:\/\//, '').slice(0, 25) + (href.length > 32 ? '…' : '')}
-            </a>
-          ) : null;
-        })}
+        {row.連結 && <LinkList text={row.連結} tagClassName="work-card__tag work-card__tag--link" onLinkClick={handleLinkClick} />}
       </div>
 
       {(row.時段 || row.工作性質?.length > 0) && (

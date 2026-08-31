@@ -48,6 +48,7 @@
   padding: 8px 16px 0;
   display: flex;
   justify-content: flex-end;
+  gap: 6px;
 }
 
 .assigned-panel__list {
@@ -147,6 +148,28 @@
   margin-top: 3px;
   font-weight: 500;
   white-space: pre-line;
+}
+
+.assigned-card__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.assigned-card__link {
+  background: #e8f0fe;
+  color: #1677ff;
+  border-radius: 4px;
+  padding: 3px 9px;
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.assigned-card__link:hover {
+  background: #bdd5ff;
+  text-decoration: underline;
 }
 
 .assigned-card__footer {

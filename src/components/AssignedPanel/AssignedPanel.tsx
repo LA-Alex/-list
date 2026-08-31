@@ -6,6 +6,9 @@ import './AssignedPanel.css';
 
 type DeadlineStatus = 'green' | 'orange' | 'red';
 
+// 交辦欄位的標準順序（kintone 下拉選單順序），篩選選項照這個排
+const 交辦_ORDER = ['待交辦', '交辦中', '完成', '結案'];
+
 const getDeadlineStatus = (due: string): DeadlineStatus => {
   const today = new Date().toISOString().slice(0, 10);
   if (!due || due >= today) return 'green';
@@ -21,6 +24,7 @@ type Props = {
 const AssignedPanel = ({ rows, onComplete }: Props) => {
   const [filter, setFilter] = useState<'all' | DeadlineStatus>('all');
   const [assignerFilter, setAssignerFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
   const greenCount = rows.filter(r => getDeadlineStatus(r.交辦到期日) === 'green').length;
   const orangeCount = rows.filter(r => getDeadlineStatus(r.交辦到期日) === 'orange').length;
@@ -36,10 +40,15 @@ const AssignedPanel = ({ rows, onComplete }: Props) => {
     ).values()
   ).filter(o => o.code);
 
+  const statusOptions = 交辦_ORDER
+    .filter(s => rows.some(r => r.交辦 === s))
+    .map(s => ({ code: s, name: s }));
+
   const visibleRows = rows
     .filter(r => filter === 'all' || getDeadlineStatus(r.交辦到期日) === filter)
     .filter(r => assignerFilter.length === 0 ||
-      r.assignerCode.split(',').some(code => assignerFilter.includes(code.trim())));
+      r.assignerCode.split(',').some(code => assignerFilter.includes(code.trim())))
+    .filter(r => statusFilter.length === 0 || statusFilter.includes(r.交辦));
 
   const toggle = (s: DeadlineStatus) => setFilter(f => f === s ? 'all' : s);
 
@@ -59,13 +68,19 @@ const AssignedPanel = ({ rows, onComplete }: Props) => {
           )}
         </div>
       </div>
-      {assignerOptions.length > 0 && (
+      {(assignerOptions.length > 0 || statusOptions.length > 0) && (
         <div className="assigned-panel__filterbar">
           <MultiSelectDropdown
             label="交辦人"
             options={assignerOptions}
             selected={assignerFilter}
             onChange={setAssignerFilter}
+          />
+          <MultiSelectDropdown
+            label="交辦狀態"
+            options={statusOptions}
+            selected={statusFilter}
+            onChange={setStatusFilter}
           />
         </div>
       )}

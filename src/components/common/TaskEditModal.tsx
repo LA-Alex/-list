@@ -418,6 +418,11 @@ const TaskEditModal = ({ row, title, mode, allTags, onSave, onClose }: Props) =>
                   onInput={() => setForm(f => ({ ...f, 內容: contentEditorRef.current?.innerHTML || '' }))}
                   onMouseUp={saveContentSelection}
                   onKeyUp={saveContentSelection}
+                  onPaste={e => {
+                    e.preventDefault();
+                    document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
+                    setForm(f => ({ ...f, 內容: contentEditorRef.current?.innerHTML || '' }));
+                  }}
                 />
               </>
             )}

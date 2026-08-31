@@ -228,30 +228,34 @@ export const addRowToWorkDay = async (
       ? Math.max(...currentRows.map((r) => Number(r.排序))) + 1
       : 1;
 
+  // 用 rowToKintone 組新列，跟既有列走同一套 fc() 轉換，避免欄位代碼含不可見字元時
+  // 寫入用的 key 對不上實際代碼、被 kintone 忽略、退回欄位的預設值（例如 產品大類）。
+  const newRow: WorkRow = {
+    subtableId: "",
+    來源標籤: sourceLabel,
+    內容: sourceRow?.內容 || "",
+    連結: sourceRow?.連結 || "",
+    地點: sourceRow?.地點 || "",
+    交辦MEMO: sourceRow?.交辦MEMO || "",
+    排序: nextOrder,
+    時段: sourceRow?.時段 || "",
+    工作性質: sourceRow?.工作性質 || [],
+    產品大類: sourceRow?.產品大類 || "",
+    關聯者: sourceRow?.關聯者 || [],
+    交辦: sourceRow?.交辦 || modalData?.交辦 || "",
+    交辦日: sourceRow?.交辦日 || modalData?.交辦日 || "",
+    交辦到期日: sourceRow?.交辦到期日 || modalData?.交辦到期日 || "",
+    交辦完成日: sourceRow?.交辦完成日 || "",
+    完成: sourceRow?.完成 || "預定",
+    來源列ID: sourceRowRef || "",
+    重要程度: sourceRow?.重要程度 || [],
+    工作時數: sourceRow?.工作時數 || "",
+    記錄號碼: "",
+  };
+
   const updatedRows = [
     ...currentRows.map((r, i) => rowToKintone(r, i)),
-    {
-      value: {
-        來源標籤: { value: sourceLabel },
-        內容: { value: sourceRow?.內容 || "" },
-        連結: { value: sourceRow?.連結 || "" },
-        地點: { value: sourceRow?.地點 || "" },
-        交辦MEMO: { value: sourceRow?.交辦MEMO || "" },
-        排序: { value: String(nextOrder) },
-        時段: { value: sourceRow?.時段 || "" },
-        工作性質: { value: sourceRow?.工作性質 || [] },
-        產品大類: { value: sourceRow?.產品大類 || "" },
-        關聯者: { value: (sourceRow?.關聯者 || []).map((u) => ({ code: u.code })) },
-        交辦: { value: sourceRow?.交辦 || modalData?.交辦 || "" },
-        交辦日: { value: sourceRow?.交辦日 || modalData?.交辦日 || null },
-        交辦到期日: { value: sourceRow?.交辦到期日 || modalData?.交辦到期日 || null },
-        交辦完成日: { value: sourceRow?.交辦完成日 || null },
-        完成: { value: sourceRow?.完成 || "預定" },
-        來源列ID: { value: sourceRowRef || "" },
-        重要程度: { value: sourceRow?.重要程度 || [] },
-        工作時數: { value: sourceRow?.工作時數 || "" },
-      },
-    },
+    { value: rowToKintone(newRow, currentRows.length).value },
   ];
 
   await kintone.api(kintone.api.url("/k/v1/record.json", true), "PUT", {
@@ -541,8 +545,8 @@ export const fetchActiveUsers = async (): Promise<{ code: string; name: string }
     .map((u: any) => ({ code: u.code, name: u.name }));
 };
 
-// 地址判斷是否在公司（Nominatim 反向地理編碼結果比對）
-const COMPANY_ADDRESS_KEYS = ['內湖路一段', '312號', '內湖區'];
+// 地址判斷是否在公司（Nominatim 反向地理編碼結果比對，地址：300號, 內湖路一段, 西湖里, 內湖區, 下塔悠, 臺北市, 114, 臺灣）
+const COMPANY_ADDRESS_KEYS = ['內湖路一段', '300號', '西湖里', '內湖區'];
 const isCompanyAddress = (addr: string): boolean =>
   COMPANY_ADDRESS_KEYS.every(k => addr.includes(k));
 

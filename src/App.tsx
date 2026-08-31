@@ -23,6 +23,7 @@ import LeftPanel from './components/LeftPanel/LeftPanel';
 import DayColumn from './components/RightPanel/DayColumn';
 import DispatchPanel from './components/DispatchPanel/DispatchPanel';
 import AssignedPanel from './components/AssignedPanel/AssignedPanel';
+import MultiSelectDropdown from './components/common/MultiSelectDropdown';
 import './App.css';
 
 const App = () => {
@@ -40,6 +41,7 @@ const App = () => {
   const [weekOffset, setWeekOffset] = useState(0);
   const [viewMode, setViewMode] = useState<'week' | 'today'>('week');
   const [taskFilter, setTaskFilter] = useState<'all' | 'done' | 'partial' | 'pending' | 'important'>('all');
+  const [tagFilter, setTagFilter] = useState<string[]>([]);
   const [viewUsers, setViewUsers] = useState<{ code: string; name: string }[]>([]);
   const [viewUserIdx, setViewUserIdx] = useState(0);
   const todayDate = getTodayDate();
@@ -57,9 +59,11 @@ const App = () => {
   useEffect(() => {
     const init = async () => {
       try {
+        // 一定連「今天」一起抓，不管目前週次是不是本週，避免切到「當天」模式時今天的資料還沒載入
+        const datesToFetch = Array.from(new Set([...getWeekDates(weekOffset), todayDate]));
         const [sources, days, assigned, dispatched, allUsers] = await Promise.all([
           getSourceRecords(),
-          fetchWorkDayRecords(getWeekDates(weekOffset)),
+          fetchWorkDayRecords(datesToFetch),
           fetchAssignedRows(),
           fetchDispatchedTasks(),
           fetchKintoneUsers(),
@@ -80,19 +84,21 @@ const App = () => {
     init();
   }, []);
 
-  // 週切換或使用者切換時重新載入資料
+  // 週切換或使用者切換時重新載入資料；一律把「今天」也一起抓進來，
+  // 這樣不管在看哪一週，切到「當天」檢視或按複製到今天都一定有資料可用。
   useEffect(() => {
     if (loading) return;
     const load = async () => {
       const targetCode = viewUsers[viewUserIdx]?.code ?? loginUser.code;
       const isSelf = targetCode === loginUser.code;
+      const datesToFetch = Array.from(new Set([...getWeekDates(weekOffset), todayDate]));
       try {
         const [days, assigned, dispatched] = await Promise.all([
-          fetchWorkDayRecords(getWeekDates(weekOffset), targetCode),
+          fetchWorkDayRecords(datesToFetch, targetCode),
           fetchAssignedRows(isSelf ? undefined : targetCode),
           fetchDispatchedTasks(isSelf ? undefined : targetCode),
         ]);
-        setWorkDays(days);
+        setWorkDays(prev => ({ ...prev, ...days }));
         setAssignedRows(assigned);
         setDispatchedTasks(dispatched);
       } catch (e) {
@@ -113,10 +119,9 @@ const App = () => {
     try {
       const { time, isCompany } = await clockIn(workDays[todayDate]);
       setClockInTime(time);
-      if (isCompany) {
-        setWorkLocation('公司');
-        await updateWorkLocation(workDays[todayDate].id!, '公司');
-      }
+      const location = isCompany ? '公司' : 'WFH/OnSite';
+      setWorkLocation(location);
+      await updateWorkLocation(workDays[todayDate].id!, location);
     } catch (e) {
       console.error(e);
       alert('打卡失敗，請確認是否允許位置存取！');
@@ -128,9 +133,10 @@ const App = () => {
     try {
       const { time, isCompany } = await clockOut(workDays[todayDate]);
       setClockOutTime(time);
-      if (isCompany && !workLocation) {
-        setWorkLocation('公司');
-        await updateWorkLocation(workDays[todayDate].id!, '公司');
+      if (!workLocation) {
+        const location = isCompany ? '公司' : 'WFH/OnSite';
+        setWorkLocation(location);
+        await updateWorkLocation(workDays[todayDate].id!, location);
       }
     } catch (e) {
       console.error(e);
@@ -186,18 +192,30 @@ const App = () => {
   };
 
   const handleCopy = async (_fromDayKey: DayType, row: WorkRow, toDayKey: DayType) => {
-    if (!workDays?.[toDayKey]) return;
+    // 目前檢視的週次不一定包含「今天」，這裡不管有沒有先載入過，都直接補抓一次今天的記錄，
+    // 確保不管在看哪一週，按複製一定能複製到今天（打卡相關欄位屬於記錄本身，不會被子表格列的複製動到）。
+    let targetRecord = workDays?.[toDayKey];
+    if (!targetRecord) {
+      const targetCode = viewUsers[viewUserIdx]?.code ?? loginUser.code;
+      const fetched = await fetchWorkDayRecords([toDayKey], targetCode);
+      targetRecord = fetched[toDayKey];
+      if (targetRecord) setWorkDays(prev => ({ ...prev, [toDayKey]: targetRecord! }));
+    }
+    if (!targetRecord) return;
     const copyFields: Partial<WorkRow> = {
+      時段: row.時段,
       產品大類: row.產品大類,
-      來源標籤: row.來源標籤,
       工作性質: row.工作性質,
+      來源標籤: row.來源標籤,
       交辦MEMO: row.交辦MEMO,
       內容: row.內容,
+      連結: row.連結,
+      重要程度: row.重要程度,
       關聯者: row.關聯者,
       交辦: row.交辦,
     };
     try {
-      const newRows = await addRowToWorkDay(workDays[toDayKey], row.來源標籤, workDays[toDayKey].rows, undefined, undefined, copyFields);
+      const newRows = await addRowToWorkDay(targetRecord, row.來源標籤, targetRecord.rows, undefined, undefined, copyFields);
       setWorkDays(prev => prev ? { ...prev, [toDayKey]: { ...prev[toDayKey], rows: newRows } } : prev);
     } catch (e) {
       console.error(e);
@@ -407,16 +425,22 @@ const App = () => {
   const labelCategoryMap = Object.fromEntries(sourceRecords.map(r => [r.標籤, r.標籤類別]));
   const labelIdMap = Object.fromEntries(sourceRecords.map(r => [r.標籤, r.id]));
   const allTags = Array.from(new Set(sourceRecords.map(r => r.標籤).filter(Boolean)));
+  // 標籤篩選只列目前檢視使用者實際用過的標籤，不是 1094 全部使用者的標籤清單
+  const usedTags = Array.from(
+    new Set(Object.values(workDays || {}).flatMap(d => d.rows.map(r => r.來源標籤)).filter(Boolean)),
+  );
+  const tagFilterOptions = usedTags.map(t => ({ code: t, name: t }));
 
   const toggleTaskFilter = (f: typeof taskFilter) => setTaskFilter(prev => prev === f ? 'all' : f);
 
   const applyTaskFilter = (rows: WorkRow[]): WorkRow[] => {
+    const base = tagFilter.length === 0 ? rows : rows.filter(r => tagFilter.includes(r.來源標籤));
     switch (taskFilter) {
-      case 'done': return rows.filter(r => r.完成 === '完成');
-      case 'partial': return rows.filter(r => r.完成 === '部分');
-      case 'pending': return rows.filter(r => r.完成 !== '完成' && r.完成 !== '部分');
-      case 'important': return rows.filter(r => r.重要程度?.includes('重要'));
-      default: return rows;
+      case 'done': return base.filter(r => r.完成 === '完成');
+      case 'partial': return base.filter(r => r.完成 === '部分');
+      case 'pending': return base.filter(r => r.完成 !== '完成' && r.完成 !== '部分');
+      case 'important': return base.filter(r => r.重要程度?.includes('重要'));
+      default: return base;
     }
   };
 
@@ -458,6 +482,12 @@ const App = () => {
                 onClick={() => setViewMode(v => v === 'week' ? 'today' : 'week')}
                 title={viewMode === 'week' ? '切換到當天' : '切換到一週'}
               >{viewMode === 'week' ? '當天' : '一週'}</button>
+              <MultiSelectDropdown
+                label="標籤"
+                options={tagFilterOptions}
+                selected={tagFilter}
+                onChange={setTagFilter}
+              />
             </div>
             <div className="week-nav__filters">
               <button className={`week-nav__filter-btn done ${taskFilter === 'done' ? 'active' : ''}`} onClick={() => toggleTaskFilter('done')} title="完成">✅</button>
@@ -465,6 +495,7 @@ const App = () => {
               <button className={`week-nav__filter-btn pending ${taskFilter === 'pending' ? 'active' : ''}`} onClick={() => toggleTaskFilter('pending')} title="還未處理">⬜</button>
               <button className={`week-nav__filter-btn important ${taskFilter === 'important' ? 'active' : ''}`} onClick={() => toggleTaskFilter('important')} title="重要">🔴</button>
             </div>
+            
           </div>
           {visibleDates.map(date => (
             <DayColumn

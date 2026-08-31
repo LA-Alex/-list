@@ -3,9 +3,13 @@ import { DispatchedTask, WorkRow } from '../../types';
 import MultiSelectDropdown from '../common/MultiSelectDropdown';
 import TaskEditModal from '../common/TaskEditModal';
 import { ContentHtml } from '../../utils/richContent';
+import { LinkList } from '../../utils/linkList';
 import './DispatchPanel.css';
 
 type DeadlineStatus = 'green' | 'orange' | 'red';
+
+// 交辦欄位的標準順序（kintone 下拉選單順序），篩選選項照這個排
+const 交辦_ORDER = ['待交辦', '交辦中', '完成', '結案'];
 
 const getDeadlineStatus = (due: string): DeadlineStatus => {
   const today = new Date().toISOString().slice(0, 10);
@@ -24,6 +28,7 @@ type Props = {
 const DispatchPanel = ({ tasks, allTags, onConfirm, onSave }: Props) => {
   const [filter, setFilter] = useState<'all' | DeadlineStatus>('all');
   const [assigneeFilter, setAssigneeFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [editingTask, setEditingTask] = useState<DispatchedTask | null>(null);
 
   const greenCount = tasks.filter(t => getDeadlineStatus(t.交辦到期日) === 'green').length;
@@ -36,9 +41,14 @@ const DispatchPanel = ({ tasks, allTags, onConfirm, onSave }: Props) => {
     ).values(),
   );
 
+  const statusOptions = 交辦_ORDER
+    .filter(s => tasks.some(t => t.交辦 === s))
+    .map(s => ({ code: s, name: s }));
+
   const visibleTasks = tasks
     .filter(t => filter === 'all' || getDeadlineStatus(t.交辦到期日) === filter)
-    .filter(t => assigneeFilter.length === 0 || t.關聯者.some(u => assigneeFilter.includes(u.code)));
+    .filter(t => assigneeFilter.length === 0 || t.關聯者.some(u => assigneeFilter.includes(u.code)))
+    .filter(t => statusFilter.length === 0 || statusFilter.includes(t.交辦));
 
   const toggle = (s: DeadlineStatus) => setFilter(f => f === s ? 'all' : s);
 
@@ -58,13 +68,19 @@ const DispatchPanel = ({ tasks, allTags, onConfirm, onSave }: Props) => {
           )}
         </div>
       </div>
-      {assigneeOptions.length > 0 && (
+      {(assigneeOptions.length > 0 || statusOptions.length > 0) && (
         <div className="dispatch-panel__filterbar">
           <MultiSelectDropdown
             label="指派給"
             options={assigneeOptions}
             selected={assigneeFilter}
             onChange={setAssigneeFilter}
+          />
+          <MultiSelectDropdown
+            label="交辦狀態"
+            options={statusOptions}
+            selected={statusFilter}
+            onChange={setStatusFilter}
           />
         </div>
       )}
@@ -99,6 +115,11 @@ const DispatchPanel = ({ tasks, allTags, onConfirm, onSave }: Props) => {
               )}
               {task.內容 && (
                 <ContentHtml text={task.內容} className="dispatch-card__content" />
+              )}
+              {task.連結 && (
+                <div className="dispatch-card__links">
+                  <LinkList text={task.連結} tagClassName="dispatch-card__link" />
+                </div>
               )}
               {task.交辦日 && (
                 <div className="dispatch-card__date">交辦日：{task.交辦日}</div>
